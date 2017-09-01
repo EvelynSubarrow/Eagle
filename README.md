@@ -9,8 +9,8 @@ Flask REST API for Network Rail's SCHEDULE. Originally intended for use by [BitB
 * GPLv3
 * `tiploc.json` can be used either under the same GPLv3, or the more restrictive Creative Commons BY-NC-SA, 4.0
 
-## `tiploc.json`
-* tiploc.json is based on reference data accessible from Network Rail's open feeds. This project is,
+## tiploc.json
+* `tiploc.json` is based on reference data accessible from Network Rail's open feeds. This project is,
 of course, not endorsed by Network Rail.
 
 ## Using Eagle
