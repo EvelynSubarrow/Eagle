@@ -1,0 +1,5 @@
+*.db
+*~
+*.sh
+*.txt
+config.json
