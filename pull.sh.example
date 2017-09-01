@@ -1,0 +1,4 @@
+DATE=$(date +"%Y-%m-%dT%H%M")
+curl -L -u "email@example.com":"password" -o sched_daily.gz 'https://datafeeds.networkrail.co.uk/ntrod/CifFileAuthenticate?type=CIF_ALL_FULL_DAILY&day=toc-full'
+pigz -vfd sched_daily.gz
+mv sched_daily sched_daily.txt
