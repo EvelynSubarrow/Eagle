@@ -54,6 +54,8 @@ TOPS_INFERENCES = OrderedDict([
     ((None, "DMU", None , "X", None),   ("158..159", ["158", "159"])),
     ])
 
+AUTH_FAIL = Response(json.dumps({"success": False, "message":"Authentication failure"}, indent=2), mimetype="application/json", status=403)
+
 with open("tiploc.json") as f:
     TIPLOCS = json.load(f)
 
@@ -106,8 +108,19 @@ def rowsfor(uid, date):
     all = [format(json.loads(a[0], object_pairs_hook=OrderedDict), date) for a in all]
     return all
 
+def is_authenticated():
+    key = request.args.get('key') or request.headers.get('x-eagle-key')
+    if config.get("keys"):
+        if key in config["keys"]:
+            return True
+        else:
+            return False
+    else:
+        return True
+
 @app.route('/schedule/<path:path>/<path:date>')
 def root(path, date):
+    if not is_authenticated(): return AUTH_FAIL
     failure_message = None
     status = 200
     try:
@@ -136,6 +149,7 @@ def root(path, date):
 @app.route('/summaries/<path:date>')
 def summaries(date):
     global TIPLOC
+    if not is_authenticated(): return AUTH_FAIL
     status, failure_message = 200, ""
     uids = request.args.get('uids', "")
     uids = uids.split(" ")
