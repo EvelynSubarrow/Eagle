@@ -18,11 +18,12 @@ TOPS_INFERENCES = OrderedDict([
     (("LM", "EMU", None , "350", None), ("350", ["350"])),
     (("LM", "EMU", None , "323", None), ("323", ["323"])),
     (("ME", "EMU", None , None , None), ("507..508", ["507", "508"])),
-    
+    (("SE", "EMU", None , "395", None), ("395", ["395"])),
+
     ((None, "EMU", None , "321", None), ("321", ["321"])), #LE
     ((None, "EMU", None , "357", None), ("357", ["357"])), #LE
     ((None, "EMU", None , "483", None), ("483", ["483"])), #IL
-    ((None, "HST", "125", None , None), ("43", ["43"])), #HST means IC125 in practice. 225s are 'E'
+    ((None, "HST", None , None , None), ("43", ["43"])), #HST means IC125 in practice. 225s are 'E'
 
     #SW EMUs can only be distinguished by seating classes, which is fine
     (("SW", "EMU", None , None,  "S"), ("455/456/458/707", ["455", "456", "458", "707"])),
