@@ -114,10 +114,16 @@ def associations(uid, date):
     c.execute("SELECT * FROM `associations` WHERE (`uid`==? OR `uid_assoc`=='asd') AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` DESC;", (uid, date))
     all = c.fetchall()
     all = [OrderedDict([(k,v) for k,v in zip(["uid", "uid_assoc", "stp", "valid_from", "valid_to", "assoc_days", "date_indicator", "category", "tiploc", "suffix", "suffix_assoc"], a)]) for a in all]
-    ret = defaultdict(list)
+    # Reduce with cancellations topmost, allowing for multiple categories per tiploc
+    ret = OrderedDict()
     for assoc in all:
-        ret[(assoc["tiploc"], assoc["suffix"])].append(assoc)
-    return ret
+        ret[(assoc["tiploc"], assoc["suffix"], assoc["category"])] = assoc
+    ret2 = defaultdict(list)
+    # Now let's put all the associations together
+    for assoc in ret.values():
+        if assoc["stp"]!="C":
+            ret2[(assoc["tiploc"], assoc["suffix"])].append(assoc)
+    return ret2
 
 def is_authenticated():
     key = request.args.get('key') or request.headers.get('x-eagle-key')
@@ -152,6 +158,7 @@ def root(path, date):
     except ValueError as e:
         status, failure_message = 400, "Invalid date format. Dates must be valid and in ISO 8601 format (YYYY-MM-DD)"
     except Exception as e:
+        raise e
         if not failure_message:
             status, failure_message = 500, "Unhandled exception"
     return Response(json.dumps({"success": False, "message":failure_message}, indent=2), mimetype="application/json", status=status)
