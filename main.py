@@ -84,13 +84,9 @@ def infer_tops(current):
 def format(schedule, date, associations):
     global TIPLOC
     schedule = order(schedule)
-    tiploc_count = Counter()
     for location in schedule["schedule_segment"]["schedule_location"]:
         tiploc = location["tiploc_code"]
-        tiploc_count[tiploc] += 1
-        location["associations"] = associations.get((tiploc, tiploc_count[tiploc]))
-        #location["crs"], location["stanox"] = None, None
-        tiploc = location["tiploc_code"]
+        location["associations"] = associations.get((tiploc, location["tiploc_instance"] or 1))
         if tiploc in TIPLOCS:
             location.update(TIPLOCS[tiploc])
         location["dolphin_times"] = OrderedDict()
