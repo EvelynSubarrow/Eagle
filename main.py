@@ -86,7 +86,7 @@ def format(schedule, date, associations):
     schedule = order(schedule)
     for location in schedule["schedule_segment"]["schedule_location"]:
         tiploc = location["tiploc_code"]
-        location["associations"] = associations.get((tiploc, location["tiploc_instance"] or 1))
+        location["associations"] = associations.get((tiploc, location["tiploc_instance"]))
         if tiploc in TIPLOCS:
             location.update(TIPLOCS[tiploc])
         location["dolphin_times"] = OrderedDict()
@@ -116,7 +116,7 @@ def associations(uid, date):
     all = [OrderedDict([(k,v) for k,v in zip(["uid", "uid_assoc", "stp", "valid_from", "valid_to", "assoc_days", "date_indicator", "category", "tiploc", "suffix", "suffix_assoc"], a)]) for a in all]
     ret = defaultdict(list)
     for assoc in all:
-        ret[(assoc["tiploc"], int(assoc["suffix"] or "1"))].append(assoc)
+        ret[(assoc["tiploc"], assoc["suffix"])].append(assoc)
     return ret
 
 def is_authenticated():
@@ -147,7 +147,6 @@ def root(path, date):
             ("cancelled", "C" in [a["CIF_stp_indicator"] for a in all]),
             ("tops_inferred", infer_tops(current)[0]),
             ("current",  current),
-            ("entries",  all),
             ])
         return Response(json.dumps(struct, indent=2), mimetype="application/json", status=status)
     except ValueError as e:
