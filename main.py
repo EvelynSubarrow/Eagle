@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sqlite3, json, datetime
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict, Counter
 import flask
 from flask import Response
 from flask import request
@@ -81,10 +81,14 @@ def infer_tops(current):
             return v
     return (None, [])
 
-def format(schedule, date):
+def format(schedule, date, associations):
     global TIPLOC
     schedule = order(schedule)
+    tiploc_count = Counter()
     for location in schedule["schedule_segment"]["schedule_location"]:
+        tiploc = location["tiploc_code"]
+        tiploc_count[tiploc] += 1
+        location["associations"] = associations.get((tiploc, tiploc_count[tiploc]))
         #location["crs"], location["stanox"] = None, None
         tiploc = location["tiploc_code"]
         if tiploc in TIPLOCS:
@@ -106,8 +110,20 @@ def rowsfor(uid, date):
     c = get_database().cursor()
     c.execute("SELECT `entry` FROM `schedules` WHERE uid==? AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` DESC;", (uid, date))
     all = c.fetchall()
-    all = [format(json.loads(a[0], object_pairs_hook=OrderedDict), date) for a in all]
+    all = [format(json.loads(a[0], object_pairs_hook=OrderedDict), date, associations(uid, date)) for a in all]
     return all
+
+def associations(uid, date):
+    c = get_database().cursor()
+    c.execute("SELECT * FROM `associations` WHERE (`uid`==? OR `uid_assoc`=='asd') AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` DESC;", (uid, date))
+    all = c.fetchall()
+    all = [OrderedDict([(k,v) for k,v in zip(["uid", "uid_assoc", "stp", "valid_from", "valid_to", "assoc_days", "date_indicator", "category", "tiploc", "suffix", "suffix_assoc"], a)]) for a in all]
+    print(all)
+    ret = defaultdict(list)
+    for assoc in all:
+        ret[(assoc["tiploc"], int(assoc["suffix"] or "1"))].append(assoc)
+    print(ret)
+    return ret
 
 def is_authenticated():
     key = request.args.get('key') or request.headers.get('x-eagle-key')
@@ -143,6 +159,7 @@ def root(path, date):
     except ValueError as e:
         status, failure_message = 400, "Invalid date format. Dates must be valid and in ISO 8601 format (YYYY-MM-DD)"
     except Exception as e:
+        raise e
         if not failure_message:
             status, failure_message = 500, "Unhandled exception"
     return Response(json.dumps({"success": False, "message":failure_message}, indent=2), mimetype="application/json", status=status)
@@ -178,7 +195,6 @@ def summaries(date):
     except ValueError as e:
         status, failure_message = 400, "Invalid date format. Dates must be valid and in ISO 8601 format"
     except Exception as e:
-        raise e
         if not failure_message:
             status, failure_message = 500, "Unhandled exception"
     return Response(json.dumps({"success": False, "message": failure_message}, indent=2), mimetype="application/json", status=status)

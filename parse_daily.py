@@ -29,6 +29,22 @@ c.execute("""CREATE TABLE schedules(
 );""")
 c.execute("CREATE INDEX idx_uid ON schedules(uid);")
 
+c.execute("""CREATE TABLE associations(
+    uid CHAR(6),
+    uid_assoc CHAR(6),
+    stp CHAR(1),
+    valid_from DATE,
+    valid_to DATE,
+    assoc_days CHAR(7),
+    date_indicator CHAR(1),
+    category CHAR(2),
+    tiploc CHAR(7),
+    suffix CHAR(1),
+    suffix_assoc CHAR(1)
+);""")
+c.execute("CREATE INDEX idx_main_uid ON associations(uid);")
+c.execute("CREATE INDEX idx_assoc_uid ON associations(uid_assoc);")
+
 count = 0
 with open("sched_daily.txt") as f:
     for line in f:
@@ -39,19 +55,7 @@ with open("sched_daily.txt") as f:
                 print(count)
             segment = jline["JsonScheduleV1"]["schedule_segment"]
             sched = jline["JsonScheduleV1"]
-            #if segment.get("CIF_power_type", ''): print(segment["CIF_power_type"])
-            #if segment.get("CIF_train_class",''): print(segment["CIF_train_class"])
-            #if segment.get("CIF_power_type", ''): print(jline, end="\n\n")
-            #print(sched.get("CIF_train_uid", ""))
-            if sched["CIF_train_uid"]=="J21716":
-                print("%s %2s %3s %1s %4s" % (
-                    sched["CIF_train_uid"],
-                    sched.get("atoc_code", ''),
-                    segment.get("CIF_power_type", ''),
-                    segment.get("CIF_train_class",''),
-                    segment.get("signalling_id", '')
-                    ))
-                #print(jline)
+
             c.execute("INSERT INTO schedules VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (
                 sched["CIF_train_uid"],
                 sched["CIF_stp_indicator"],
@@ -67,5 +71,20 @@ with open("sched_daily.txt") as f:
                 segment["CIF_speed"],
                 json.dumps(sched)
                 ))
+        elif "JsonAssociationV1" in jline:
+            assoc = jline["JsonAssociationV1"]
+            if assoc["assoc_location_suffix"]: print(assoc)
+            c.execute("INSERT INTO associations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (
+                assoc["main_train_uid"], assoc["assoc_train_uid"],
+                assoc["CIF_stp_indicator"],
+                assoc["assoc_start_date"][:10], assoc["assoc_end_date"][:10],
+                assoc["assoc_days"],
+                assoc["date_indicator"],
+                assoc["category"],
+                assoc["location"],
+                assoc["base_location_suffix"],
+                assoc["assoc_location_suffix"]
+                ))
+
 conn.commit()
 conn.close()
