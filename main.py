@@ -118,11 +118,9 @@ def associations(uid, date):
     c.execute("SELECT * FROM `associations` WHERE (`uid`==? OR `uid_assoc`=='asd') AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` DESC;", (uid, date))
     all = c.fetchall()
     all = [OrderedDict([(k,v) for k,v in zip(["uid", "uid_assoc", "stp", "valid_from", "valid_to", "assoc_days", "date_indicator", "category", "tiploc", "suffix", "suffix_assoc"], a)]) for a in all]
-    print(all)
     ret = defaultdict(list)
     for assoc in all:
         ret[(assoc["tiploc"], int(assoc["suffix"] or "1"))].append(assoc)
-    print(ret)
     return ret
 
 def is_authenticated():
@@ -159,7 +157,6 @@ def root(path, date):
     except ValueError as e:
         status, failure_message = 400, "Invalid date format. Dates must be valid and in ISO 8601 format (YYYY-MM-DD)"
     except Exception as e:
-        raise e
         if not failure_message:
             status, failure_message = 500, "Unhandled exception"
     return Response(json.dumps({"success": False, "message":failure_message}, indent=2), mimetype="application/json", status=status)

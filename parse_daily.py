@@ -73,7 +73,6 @@ with open("sched_daily.txt") as f:
                 ))
         elif "JsonAssociationV1" in jline:
             assoc = jline["JsonAssociationV1"]
-            if assoc["assoc_location_suffix"]: print(assoc)
             c.execute("INSERT INTO associations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (
                 assoc["main_train_uid"], assoc["assoc_train_uid"],
                 assoc["CIF_stp_indicator"],
