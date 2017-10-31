@@ -87,6 +87,7 @@ def format(schedule, date, associations):
     for location in schedule["schedule_segment"]["schedule_location"]:
         tiploc = location["tiploc_code"]
         location["associations"] = associations.get((tiploc, location["tiploc_instance"]))
+        print(location["associations"])
         if tiploc in TIPLOCS:
             location.update(TIPLOCS[tiploc])
         location["dolphin_times"] = OrderedDict()
@@ -102,16 +103,16 @@ def order(schedule):
         )
     return schedule
 
-def rowsfor(uid, date):
+def rowsfor(uid, date, recurse=True):
     c = get_database().cursor()
     c.execute("SELECT `entry` FROM `schedules` WHERE uid==? AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` DESC;", (uid, date))
     all = c.fetchall()
-    all = [format(json.loads(a[0], object_pairs_hook=OrderedDict), date, associations(uid, date)) for a in all]
+    all = [format(json.loads(a[0], object_pairs_hook=OrderedDict), date, associations(uid, date, recurse)) for a in all]
     return all
 
-def associations(uid, date):
+def associations(uid, date, recurse):
     c = get_database().cursor()
-    c.execute("SELECT * FROM `associations` WHERE (`uid`==? OR `uid_assoc`=='asd') AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` DESC;", (uid, date))
+    c.execute("SELECT * FROM `associations` WHERE (`uid`==? OR `uid_assoc`==?) AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` DESC;", (uid, uid, date))
     all = c.fetchall()
     all = [OrderedDict([(k,v) for k,v in zip(["uid", "uid_assoc", "stp", "valid_from", "valid_to", "assoc_days", "date_indicator", "category", "tiploc", "suffix", "suffix_assoc"], a)]) for a in all]
     # Reduce with cancellations topmost, allowing for multiple categories per tiploc
@@ -121,8 +122,28 @@ def associations(uid, date):
     ret2 = defaultdict(list)
     # Now let's put all the associations together
     for assoc in ret.values():
+        assoc["from"] = False
+        # For the sake of simplicity, uid_assoc will always refer to the service associated (from)/to
+        if assoc["uid_assoc"] == uid:
+            assoc["uid"], assoc["uid_assoc"] = assoc["uid_assoc"], assoc["uid"]
+            # This is a 'from' association. This train was separated from, joined from, or was previous service
+            assoc["from"] = True
+        assoc.update({a:None for a in ["origin_name", "origin_crs", "origin_tiploc", "dest_name", "dest_crs", "dest_tiploc"]})
+        if recurse:
+            assoc_sched = schedule_for(assoc["uid_assoc"], date, False)
+            if assoc_sched and assoc_sched.get("current"):
+                locs = assoc_sched["current"]["schedule_segment"]["schedule_location"]
+                first, last = locs[0], locs[-1]
+                far = first if assoc["from"] else last
+                assoc.update({"origin_name": first["name"], "origin_crs": first["crs"], "origin_tiploc": first["tiploc"],
+                             "dest_name": last["name"], "dest_crs": last["crs"], "dest_tiploc": last["tiploc"],
+                             "far_name": far["name"], "far_crs": far["crs"], "far_tiploc": far["tiploc"]
+                    })
+                print("penis")
         if assoc["stp"]!="C":
             ret2[(assoc["tiploc"], assoc["suffix"])].append(assoc)
+    print("haha")
+    print(ret2)
     return ret2
 
 def is_authenticated():
@@ -135,16 +156,10 @@ def is_authenticated():
     else:
         return True
 
-@app.route('/schedule/<path:path>/<path:date>')
-def root(path, date):
-    if not is_authenticated(): return AUTH_FAIL
-    failure_message = None
-    status = 200
-    try:
-        #validate date
+def schedule_for(uid, date, recurse=True):
         datetime.datetime.strptime(date, "%Y-%m-%d")
 
-        all = rowsfor(path, date)
+        all = rowsfor(uid, date, recurse)
         current = [a for a in all if a["CIF_stp_indicator"]!="C"][-1]
         struct = OrderedDict([
             ("success",True),
@@ -154,6 +169,15 @@ def root(path, date):
             ("tops_inferred", infer_tops(current)[0]),
             ("current",  current),
             ])
+        return struct
+
+@app.route('/schedule/<path:path>/<path:date>')
+def root(path, date):
+    if not is_authenticated(): return AUTH_FAIL
+    failure_message = None
+    status = 200
+    try:
+        struct = schedule_for(path, date)
         return Response(json.dumps(struct, indent=2), mimetype="application/json", status=status)
     except ValueError as e:
         status, failure_message = 400, "Invalid date format. Dates must be valid and in ISO 8601 format (YYYY-MM-DD)"
@@ -192,6 +216,7 @@ def summaries(date):
         return Response(json.dumps(out, indent=2), mimetype="application/json", status=200)
             
     except ValueError as e:
+        raise e
         status, failure_message = 400, "Invalid date format. Dates must be valid and in ISO 8601 format"
     except Exception as e:
         if not failure_message:
