@@ -127,13 +127,18 @@ def associations(uid, date, recurse):
             assoc["uid"], assoc["uid_assoc"] = assoc["uid_assoc"], assoc["uid"]
             # This is a 'from' association. This train was separated from, joined from, or was previous service
             assoc["from"] = True
+        # Direction is to indicate whether it's more helpful to indicate the origin as an associated from (VV, NP)
+        # Or destination (JJ). Generally, if the association doesn't happen at the terminus or origin of the association,
+        # Destination is preferable (and more useful for passengers)
+        assoc["direction"] = assoc["from"]
         assoc.update({a:None for a in ["origin_name", "origin_crs", "origin_tiploc", "dest_name", "dest_crs", "dest_tiploc"]})
         if recurse:
             assoc_sched = schedule_for(assoc["uid_assoc"], date, False)
             if assoc_sched and assoc_sched.get("current"):
                 locs = assoc_sched["current"]["schedule_segment"]["schedule_location"]
                 first, last = locs[0], locs[-1]
-                far = first if assoc["from"] else last
+                assoc["direction"] = last["tiploc"]==assoc["tiploc"]
+                far = first if assoc["direction"] else last
                 assoc.update({"origin_name": first["name"], "origin_crs": first["crs"], "origin_tiploc": first["tiploc"],
                              "dest_name": last["name"], "dest_crs": last["crs"], "dest_tiploc": last["tiploc"],
                              "far_name": far["name"], "far_crs": far["crs"], "far_tiploc": far["tiploc"]
