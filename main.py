@@ -87,7 +87,6 @@ def format(schedule, date, associations):
     for location in schedule["schedule_segment"]["schedule_location"]:
         tiploc = location["tiploc_code"]
         location["associations"] = associations.get((tiploc, location["tiploc_instance"]))
-        print(location["associations"])
         if tiploc in TIPLOCS:
             location.update(TIPLOCS[tiploc])
         location["dolphin_times"] = OrderedDict()
@@ -139,11 +138,8 @@ def associations(uid, date, recurse):
                              "dest_name": last["name"], "dest_crs": last["crs"], "dest_tiploc": last["tiploc"],
                              "far_name": far["name"], "far_crs": far["crs"], "far_tiploc": far["tiploc"]
                     })
-                print("penis")
         if assoc["stp"]!="C":
             ret2[(assoc["tiploc"], assoc["suffix"])].append(assoc)
-    print("haha")
-    print(ret2)
     return ret2
 
 def is_authenticated():
