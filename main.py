@@ -102,14 +102,14 @@ def order(schedule):
         )
     return schedule
 
-def rowsfor(uid, date, recurse=True):
+def rowsfor(uid, date, recurse=False):
     c = get_database().cursor()
     c.execute("SELECT `entry` FROM `schedules` WHERE uid==? AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` DESC;", (uid, date))
     all = c.fetchall()
     all = [format(json.loads(a[0], object_pairs_hook=OrderedDict), date, associations(uid, date, recurse)) for a in all]
     return all
 
-def associations(uid, date, recurse):
+def associations(uid, date, recurse=False):
     c = get_database().cursor()
     c.execute("SELECT * FROM `associations` WHERE (`uid`==? OR `uid_assoc`==?) AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` DESC;", (uid, uid, date))
     all = c.fetchall()
@@ -157,7 +157,7 @@ def is_authenticated():
     else:
         return True
 
-def schedule_for(uid, date, recurse=True):
+def schedule_for(uid, date, recurse=False):
         datetime.datetime.strptime(date, "%Y-%m-%d")
 
         all = rowsfor(uid, date, recurse)
@@ -178,12 +178,11 @@ def root(path, date):
     failure_message = None
     status = 200
     try:
-        struct = schedule_for(path, date)
+        struct = schedule_for(path, date, True)
         return Response(json.dumps(struct, indent=2), mimetype="application/json", status=status)
     except ValueError as e:
         status, failure_message = 400, "Invalid date format. Dates must be valid and in ISO 8601 format (YYYY-MM-DD)"
     except Exception as e:
-        raise e
         if not failure_message:
             status, failure_message = 500, "Unhandled exception"
     return Response(json.dumps({"success": False, "message":failure_message}, indent=2), mimetype="application/json", status=status)
@@ -220,6 +219,7 @@ def summaries(date):
         raise e
         status, failure_message = 400, "Invalid date format. Dates must be valid and in ISO 8601 format"
     except Exception as e:
+        raise e
         if not failure_message:
             status, failure_message = 500, "Unhandled exception"
     return Response(json.dumps({"success": False, "message": failure_message}, indent=2), mimetype="application/json", status=status)
