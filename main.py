@@ -60,6 +60,9 @@ AUTH_FAIL = Response(json.dumps({"success": False, "message":"Authentication fai
 with open("tiploc.json") as f:
     TIPLOCS = json.load(f)
 
+with open("tocs.json") as f:
+    TOCS = json.load(f)
+
 with open("config.json") as f:
     config = json.load(f)
 
@@ -70,50 +73,53 @@ def get_database():
     global _database
     if not _database:
         _database = sqlite3.connect('schedule.db', check_same_thread=False)
+        _database.row_factory = sqlite3.Row
     return _database
 
 def infer_tops(current):
-    segment = current["schedule_segment"]
-    tuple = (current["atoc_code"], segment["CIF_power_type"], segment["CIF_speed"],
-        segment["CIF_timing_load"], segment["CIF_train_class"])
+    tuple = (current["atoc_code"], current["power_type"], current["speed"],
+        current["timing_load"], current["seating_class"])
     for k,v in TOPS_INFERENCES.items():
         if all([not y or x==y for x,y in zip(tuple, k)]):
             return v
     return (None, [])
 
 def format(schedule, date, associations):
-    global TIPLOC
-    schedule = order(schedule)
-    for location in schedule["schedule_segment"]["schedule_location"]:
-        tiploc = location["tiploc_code"]
+    global TIPLOCS, TOCS
+
+    for location in schedule["locations"]:
+        del location["iid"], location["seq"]
+        tiploc = location["tiploc"]
         location["associations"] = associations.get((tiploc, location["tiploc_instance"]))
+        
+        location["name"], location["crs"] = None, None
         if tiploc in TIPLOCS:
-            location.update(TIPLOCS[tiploc])
+            loc_data = TIPLOCS[tiploc]
+            location["name"], location["crs"] = loc_data["name"], loc_data["crs"]
+
         location["dolphin_times"] = OrderedDict()
-        location["dolphin_times"]["sta"] = location.get("public_arrival") or location.get("arrival")
-        location["dolphin_times"]["std"] = location.get("public_departure") or location.get("departure") or location.get("pass")
+        location["dolphin_times"]["sta"] = location.get("arrival_public") or location.get("arrival")
+        location["dolphin_times"]["std"] = location.get("departure_public") or location.get("departure") or location.get("pass")
         location["dolphin_times"]["pass"] = location.get("pass")
     return schedule
 
-def order(schedule):
-    sched_recursed = [(k,order(v) if isinstance(v, dict) else v) for k,v in schedule.items()]
-    schedule = OrderedDict(
-        sorted(sched_recursed, key=lambda x: {list: "zzzy" + x[0], dict: "zzzz" + x[0], OrderedDict: "zzzz" + x[0]}.get(type(x[1]), x[0]))
-        )
-    return schedule
-
-def rowsfor(uid, date, recurse=False):
+def rowfor(uid, date, recurse=False):
     c = get_database().cursor()
-    c.execute("SELECT `entry` FROM `schedules` WHERE uid==? AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` DESC;", (uid, date))
-    all = c.fetchall()
-    all = [format(json.loads(a[0], object_pairs_hook=OrderedDict), date, associations(uid, date, recurse)) for a in all]
-    return all
+    c.execute("SELECT * FROM `schedules` WHERE `uid`==? AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` ASC LIMIT 1;", (uid, date))
+    ret = c.fetchone()
+    if ret:
+        ret = OrderedDict(ret)
+        ret["operator_name"] = TOCS.get(ret["atoc_code"])
+        c.execute("SELECT * FROM `locations` WHERE `iid`==? ORDER BY `seq`;", [ret["iid"],])
+        ret["locations"] = [OrderedDict(a) for a in c.fetchall()]
+        ret = format(OrderedDict(ret), date, associations(uid, date, recurse))
+    return ret
 
 def associations(uid, date, recurse=False):
     c = get_database().cursor()
     c.execute("SELECT * FROM `associations` WHERE (`uid`==? OR `uid_assoc`==?) AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` DESC;", (uid, uid, date))
     all = c.fetchall()
-    all = [OrderedDict([(k,v) for k,v in zip(["uid", "uid_assoc", "stp", "valid_from", "valid_to", "assoc_days", "date_indicator", "category", "tiploc", "suffix", "suffix_assoc"], a)]) for a in all]
+    all = [OrderedDict(a) for a in all]
     # Reduce with cancellations topmost, allowing for multiple categories per tiploc
     ret = OrderedDict()
     for assoc in all:
@@ -133,9 +139,9 @@ def associations(uid, date, recurse=False):
         assoc["direction"] = assoc["from"]
         assoc.update({a:None for a in ["origin_name", "origin_crs", "origin_tiploc", "dest_name", "dest_crs", "dest_tiploc"]})
         if recurse:
-            assoc_sched = schedule_for(assoc["uid_assoc"], date, False)
-            if assoc_sched and assoc_sched.get("current"):
-                locs = assoc_sched["current"]["schedule_segment"]["schedule_location"]
+            assoc_sched = rowfor(assoc["uid_assoc"], date, False)
+            if assoc_sched:
+                locs = assoc_sched["locations"]
                 first, last = locs[0], locs[-1]
                 assoc["direction"] = last["tiploc"]==assoc["tiploc"]
                 far = first if assoc["direction"] else last
@@ -160,13 +166,11 @@ def is_authenticated():
 def schedule_for(uid, date, recurse=False):
         datetime.datetime.strptime(date, "%Y-%m-%d")
 
-        all = rowsfor(uid, date, recurse)
-        current = [a for a in all if a["CIF_stp_indicator"]!="C"][-1]
+        current = rowfor(uid, date, recurse)
         struct = OrderedDict([
             ("success",True),
             ("message", "OK"),
-            ("rows", len(all)),
-            ("cancelled", "C" in [a["CIF_stp_indicator"] for a in all]),
+            ("cancelled", current["stp"]=="C"),
             ("tops_inferred", infer_tops(current)[0]),
             ("current",  current),
             ])
@@ -198,28 +202,25 @@ def summaries(date):
         datetime.datetime.strptime(date, "%Y-%m-%d")
         out = OrderedDict()
         for uid in uids:
-            entries = rowsfor(uid, date)
-            if not entries:
+            current = rowfor(uid, date)
+            if not current:
                 out[uid] = {}
             else:
-                current = [a for a in entries if a["CIF_stp_indicator"]!="C"][-1]
                 out[uid] = OrderedDict([
-                    ("cancelled", "C" in [a["CIF_stp_indicator"] for a in entries]),
+                    ("cancelled", current["stp"]=="C"),
                     ("tops_inferred", infer_tops(current)[0]),
                     ("tops_possible", infer_tops(current)[1]),
                     ("atoc_code", current["atoc_code"]),
-                    ("power_type", current["schedule_segment"]["CIF_power_type"]),
+                    ("power_type", current["power_type"]),
                     ("platforms", OrderedDict(
-                        [(TIPLOCS[a["tiploc_code"]]["crs"],a["platform"]) for a in current["schedule_segment"]["schedule_location"] if not a.get("pass") and a["tiploc_code"] in TIPLOCS and a["crs"]]
+                        [(a["crs"],a["platform"]) for a in current["locations"] if not a.get("pass") and a["crs"]]
                         )),
                     ])
         return Response(json.dumps(out, indent=2), mimetype="application/json", status=200)
             
     except ValueError as e:
-        raise e
         status, failure_message = 400, "Invalid date format. Dates must be valid and in ISO 8601 format"
     except Exception as e:
-        raise e
         if not failure_message:
             status, failure_message = 500, "Unhandled exception"
     return Response(json.dumps({"success": False, "message": failure_message}, indent=2), mimetype="application/json", status=status)
