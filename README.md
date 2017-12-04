@@ -8,10 +8,13 @@ Flask REST API for Network Rail's SCHEDULE. Originally intended for use by [BitB
 ## Licences
 * GPLv3
 * `tiploc.json` can be used either under the same GPLv3, or the more restrictive Creative Commons BY-NC-SA, 4.0
+* `tocs.json` - see above
 
 ## tiploc.json
-* `tiploc.json` is based on reference data accessible from Network Rail's open feeds. This project is,
-of course, not endorsed by Network Rail.
+* `tiploc.json` is based on reference data published by Network Rail, National Rail Enquiries, and the Department
+for Transport. None of these organisations are affiliated with this project.
+## tocs.json
+* `tocs.json` is based solely on reference data from National Rail Enquiries.
 
 ## Using Eagle
 You'll need an email address and password for a Network Rail open data account. You can sign up
@@ -21,8 +24,8 @@ It can take several days for your account to become active, and you'll have to
 specifically add SCHEDULE to your account.
 
 When you have an account, and have added SCHEDULE, you'll need to download it. A snapshot is published
-daily at approximately 0600, and `pull.sh.example` is provided to demonstrate how to retrieve this information for
-all TOCs. Once you have the JSON schedule, you should run `parse_daily.py`, which will create and populate `schedule.db`.
+daily at approximately 0100, and `cif_pull.sh.example` is provided to demonstrate how to retrieve this information for
+all TOCs. Once you have the CIF schedule, you should run `parse_cif.py`, which will create and populate `schedule.db`.
 
 Once this is done, you'll want to rename `config.json.example` to `config.json`, review the settings, then run `main.py`.
 
