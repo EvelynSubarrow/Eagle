@@ -82,6 +82,16 @@ c.execute("""CREATE TABLE locations(
 );""")
 c.execute("CREATE INDEX idx_loc_iid ON locations(iid);")
 
+c.execute("""CREATE TABLE codes(
+    tiploc CHAR(7),
+    description CHAR(26),
+    stanox CHAR(5),
+    crs CHAR(3)
+);""")
+c.execute("CREATE INDEX idx_codes_tiploc ON codes(tiploc);")
+c.execute("CREATE INDEX idx_codes_stanox ON codes(stanox);")
+c.execute("CREATE INDEX idx_codes_crs    ON codes(crs);")
+
 def convert_chars(string):
     return string
 
@@ -149,7 +159,7 @@ def r2d(record):
     global RECORDS
     record_type = record[:2]
     record_ptr = 2
-    store_dict = record_type[0]=="L"
+    store_dict = record_type[0] in ["L","T"]
     rdict = {}
     rl = []
     for element in RECORDS[record_type]:
@@ -184,6 +194,8 @@ with open("sched.cif", "rb") as f:
         if record_type == "AA":
             c.execute("INSERT INTO `associations` VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
                 res)
+        elif record_type == "TI":
+            c.execute("INSERT INTO `codes` VALUES (?, ?, ?, ?);", (res["tiploc"], res["description_tps"], res["stanox"], res["crs"]))
         elif record_type == "BS":
             bs_id += 1
             loc_id = 0

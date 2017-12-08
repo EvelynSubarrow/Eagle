@@ -88,14 +88,14 @@ def format(schedule, date, associations):
     global TIPLOCS, TOCS
 
     for location in schedule["locations"]:
-        del location["iid"], location["seq"]
+        del location["iid"], location["seq"], location["description"]
         tiploc = location["tiploc"]
         location["associations"] = associations.get((tiploc, location["tiploc_instance"]))
         
         location["name"], location["crs"] = None, None
         if tiploc in TIPLOCS:
             loc_data = TIPLOCS[tiploc]
-            location["name"], location["crs"] = loc_data["name"], loc_data["crs"]
+            location["name"] = loc_data["name"]
 
         location["dolphin_times"] = OrderedDict()
         location["dolphin_times"]["sta"] = location.get("arrival_public") or location.get("arrival")
@@ -110,7 +110,7 @@ def rowfor(uid, date, recurse=False):
     if ret:
         ret = OrderedDict(ret)
         ret["operator_name"] = TOCS.get(ret["atoc_code"])
-        c.execute("SELECT * FROM `locations` WHERE `iid`==? ORDER BY `seq`;", [ret["iid"],])
+        c.execute("SELECT codes.*,locations.* FROM locations LEFT JOIN codes ON locations.tiploc==codes.tiploc WHERE locations.iid==? ORDER BY locations.seq;", [ret["iid"],])
         ret["locations"] = [OrderedDict(a) for a in c.fetchall()]
         ret = format(OrderedDict(ret), date, associations(uid, date, recurse))
     return ret
@@ -187,6 +187,7 @@ def root(path, date):
     except ValueError as e:
         status, failure_message = 400, "Invalid date format. Dates must be valid and in ISO 8601 format (YYYY-MM-DD)"
     except Exception as e:
+        raise e
         if not failure_message:
             status, failure_message = 500, "Unhandled exception"
     return Response(json.dumps({"success": False, "message":failure_message}, indent=2), mimetype="application/json", status=status)
