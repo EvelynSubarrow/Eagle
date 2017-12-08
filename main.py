@@ -92,7 +92,7 @@ def format(schedule, date, associations):
         tiploc = location["tiploc"]
         location["associations"] = associations.get((tiploc, location["tiploc_instance"]))
         
-        location["name"], location["crs"] = None, None
+        location["name"] = None
         if tiploc in TIPLOCS:
             loc_data = TIPLOCS[tiploc]
             location["name"] = loc_data["name"]
