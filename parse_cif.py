@@ -7,6 +7,16 @@ from collections import Counter, OrderedDict
 # It turns out that dropping the table is also slow. It follows that the quickest way to remove all
 # rows is to delete the DB file itself
 
+with open("codes/tiploc.json") as f:
+    TIPLOC = json.load(f)
+
+def process_tiploc(tiploc, name, stanox, crs):
+    entry = TIPLOC.get(tiploc)
+    if entry:
+        return (tiploc, entry["name"], entry["name_source"], stanox, entry["crs"])
+    else:
+        return (tiploc, name, "N", stanox, crs)
+
 try:
     os.remove('schedule.db')
 except FileNotFoundError:
@@ -84,7 +94,8 @@ c.execute("CREATE INDEX idx_loc_iid ON locations(iid);")
 
 c.execute("""CREATE TABLE codes(
     tiploc CHAR(7),
-    description CHAR(26),
+    name CHAR(26),
+    name_source CHAR(1),
     stanox CHAR(5),
     crs CHAR(3)
 );""")
@@ -195,7 +206,7 @@ with open("sched.cif", "rb") as f:
             c.execute("INSERT INTO `associations` VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
                 res)
         elif record_type == "TI":
-            c.execute("INSERT INTO `codes` VALUES (?, ?, ?, ?);", (res["tiploc"], res["description_tps"], res["stanox"], res["crs"]))
+            c.execute("INSERT INTO `codes` VALUES (?, ?, ?, ?, ?);", process_tiploc(res["tiploc"], res["description_tps"], res["stanox"], res["crs"]))
         elif record_type == "BS":
             bs_id += 1
             loc_id = 0

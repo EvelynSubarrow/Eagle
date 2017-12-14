@@ -43,16 +43,11 @@ def format(schedule, date, associations):
     global TIPLOCS, TOCS
 
     for location in schedule["locations"]:
-        del location["iid"], location["seq"], location["description"]
+        del location["iid"], location["seq"]
         tiploc = location["tiploc"]
         location["activity_list"] = [a+b for a,b in list(zip(*[iter(location["activity"])]*2)) if (a+b).strip()]
-        location["name"] = None
         location["associations"] = associations.get((tiploc, location["tiploc_instance"]))
         
-        if tiploc in TIPLOCS:
-            loc_data = TIPLOCS[tiploc]
-            location["name"] = loc_data["name"]
-
         location["dolphin_times"] = OrderedDict()
         location["dolphin_times"]["sta"] = location.get("arrival_public") or location.get("arrival")
         location["dolphin_times"]["std"] = location.get("departure_public") or location.get("departure") or location.get("pass")
