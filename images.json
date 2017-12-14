@@ -42,6 +42,15 @@
             "name": "Philphos/Unisouth",
             "licence": "CC BY-SA 3.0"
         }
+    },
+
+    "sr380": {
+        "uri": "/r/SR380.png",
+        "attribution": {
+            "uri": "https://commons.wikimedia.org/wiki/File:Class_380_First_Scotrail_Diagram.PNG",
+            "name": "Unisouth",
+            "licence": "CC BY-SA 3.0"
+        }
     }
 
 }
