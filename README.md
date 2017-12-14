@@ -7,14 +7,18 @@ Flask REST API for Network Rail's SCHEDULE. Originally intended for use by [BitB
 
 ## Licences
 * GPLv3
-* `tiploc.json` can be used either under the same GPLv3, or the more restrictive Creative Commons BY-NC-SA, 4.0
+* `tiploc.json` can be used either under the same GPLv3, or CC BY-SA 3.0
 * `tocs.json` - see above
+* `/codes/*` - Primarily based on tables in the NROD wiki, licenced under CC BY-SA 3.0
+* Train diagram licences and attributions are contained in `images.json`
 
 ## tiploc.json
 * `tiploc.json` is based on reference data published by Network Rail, National Rail Enquiries, and the Department
 for Transport. None of these organisations are affiliated with this project.
 ## tocs.json
 * `tocs.json` is based solely on reference data from National Rail Enquiries.
+## Other JSON
+* All other data in /codes/ is based on tables in the NROD wiki
 
 ## Using Eagle
 You'll need an email address and password for a Network Rail open data account. You can sign up
