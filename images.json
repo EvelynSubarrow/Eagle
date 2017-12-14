@@ -15,5 +15,33 @@
             "name": "Enotayokel/Unisouth",
             "licence": "CC BY-SA 3.0"
         }
+    },
+
+    "xn317": {
+        "uri": "/r/XN317.png",
+        "attribution": {
+            "uri": "https://commons.wikimedia.org/wiki/File:Class_317_NSE_Livery.png",
+            "name": "Feathers44/Unisouth",
+            "licence": "CC BY-SA 3.0"
+        }
+    },
+
+    "lo378": {
+        "uri": "/r/LO378.png",
+        "attribution": {
+            "uri": "https://commons.wikimedia.org/wiki/File:Class_378_Electrostar_London_Overground.jpg",
+            "name": "East london line",
+            "licence": "CC BY-SA 3.0"
+        }
+    },
+
+    "me507-508": {
+        "uri": "/r/ME507-508.png",
+        "attribution": {
+            "uri": "https://commons.wikimedia.org/wiki/File:Class_507_Merseyrail_New_Diagram.png",
+            "name": "Philphos/Unisouth",
+            "licence": "CC BY-SA 3.0"
+        }
     }
+
 }

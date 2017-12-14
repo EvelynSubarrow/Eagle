@@ -7,15 +7,15 @@ with open("images.json") as f:
 #ATOC, power, speed, timing load, "train class" (reservation availability)
 TOPS_INFERENCES = [
     (("VT", "EMU", "125", "390", None), ["390"], "Pendolino"),
-    (("LO", "EMU", "075", "375", None), ["378"], "Capitalstar"),
-    (("LO", "EMU", "075", "313", None), ["378"], "Capitalstar"),
+    (("LO", "EMU", "075", "375", None), ["378"], "Capitalstar", IMAGES["lo378"]),
+    (("LO", "EMU", "075", "313", None), ["378"], "Capitalstar", IMAGES["lo378"]),
     (("LO", "EMU", None , "315", None), ["315"]),
-    (("LO", "EMU", None , "317", None), ["317"]),
+    (("LO", "EMU", None , "317", None), ["317"], None, IMAGES["xn317"]),
     (("XR", "EMU", None , "315", None), ["315"]),
     (("SR", "EMU", None , "0",   None), ["380"], "Desiro"),
     (("LM", "EMU", None , "350", None), ["350"], "Desiro"),
     (("LM", "EMU", None , "323", None), ["323"]),
-    (("ME", "EMU", None , None , None), ["507", "508"]),
+    (("ME", "EMU", None , None , None), ["507", "508"], None, IMAGES["me507-508"]),
     (("SE", "EMU", None , "395", None), ["395"], "Javelin"),
 
     ((None, "EMU", None , "321", None), ["321"]), #LE
