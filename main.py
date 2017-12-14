@@ -1,67 +1,30 @@
 #!/usr/bin/env python3
 
-import sqlite3, json, datetime
+import sqlite3, json, datetime, os
 from collections import OrderedDict, defaultdict, Counter
-import flask
+
+import flask, werkzeug
 from flask import Response
 from flask import request
 
-#ATOC, power, speed, timing load, "train class" (reservation availability)
-TOPS_INFERENCES = OrderedDict([
-    (("VT", "EMU", "125", "390", None), ("390", ["390"])),
-    (("LO", "EMU", "075", "375", None), ("378", ["378"])),
-    (("LO", "EMU", "075", "313", None), ("378", ["378"])),
-    (("LO", "EMU", None , "315", None), ("315", ["315"])),
-    (("LO", "EMU", None , "317", None), ("317", ["317"])),
-    (("XR", "EMU", None , "315", None), ("315", ["315"])),
-    (("SR", "EMU", None , "0",   None), ("380", ["380"])),
-    (("LM", "EMU", None , "350", None), ("350", ["350"])),
-    (("LM", "EMU", None , "323", None), ("323", ["323"])),
-    (("ME", "EMU", None , None , None), ("507..508", ["507", "508"])),
-    (("SE", "EMU", None , "395", None), ("395", ["395"])),
+import tops
 
-    ((None, "EMU", None , "321", None), ("321", ["321"])), #LE
-    ((None, "EMU", None , "357", None), ("357", ["357"])), #LE
-    ((None, "EMU", None , "483", None), ("483", ["483"])), #IL
-    ((None, "HST", None , None , None), ("43", ["43"])), #HST means IC125 in practice. 225s are 'E'
-
-    #SW EMUs can only be distinguished by seating classes, which is fine
-    (("SW", "EMU", None , None,  "S"), ("455/456/458/707", ["455", "456", "458", "707"])),
-    (("SW", "EMU", None , None,  "B"), ("444/450/458", ["444", "450", "458"])),
-
-    #HX only properly indicates class for HXX(2/3)-HAF(4) 360/2 services
-    (("HX", "EMU", None , "360", None), ("360", ["360"])),
-    (("HX", "EMU", None ,  None, None), ("332", ["332"])),
-
-    #NT doesn't operate any 143s, so exclude
-    (("NT", "DMU", None , "A", None),   ("142/144", ["142", "144"])),
-
-    #GW only operates class 143 pacers
-    (("GW", "DMU", None , "A", None),   ("143", ["143"])),
-
-    #EM operates only two "high speed" classes. 222 *should* be DEM but whatever
-    (("EM", "DMU", "125", None, None),   ("222", ["222"])),
-
-    #GR (VTEC)'s only 'E' locos *must* be IC225s
-    (("GR", "E",   "125" , None, None), ("91", ["91"])),
-
-    #Non-TOC-specific DMU ranges
-    ((None, "DMU", None , "A", None),   ("142..144", ["142", "143", "144"])),
-    ((None, "DMU", None , "E", None),   ("158/168/170/175", ["158", "168", "170", "175"])),
-    ((None, "DMU", None , "N", None),   ("165", ["165"])),
-    ((None, "DMU", None , "S", None),   ("150/153/155/156", ["150", "153", "155", "156"])),
-    ((None, "DMU", None , "T", None),   ("165/1..166", ["165", "166"])),
-    ((None, "DMU", None , "V", None),   ("220..221", ["220", "221"])),
-    ((None, "DMU", None , "X", None),   ("158..159", ["158", "159"])),
-    ])
-
+class UnauthenticatedException(Exception): pass
 AUTH_FAIL = Response(json.dumps({"success": False, "message":"Authentication failure"}, indent=2), mimetype="application/json", status=403)
 
-with open("tiploc.json") as f:
+with open("codes/tiploc.json") as f:
     TIPLOCS = json.load(f)
 
-with open("tocs.json") as f:
+with open("codes/tocs.json") as f:
     TOCS = json.load(f)
+
+with open("codes/activity.json") as f:
+    ACTIVITY = json.load(f)
+
+CODES = {}
+for name in os.listdir("codes"):
+    with open("codes/%s" % name) as f:
+        CODES[name.split(".")[0]] = json.load(f)
 
 with open("config.json") as f:
     config = json.load(f)
@@ -76,23 +39,16 @@ def get_database():
         _database.row_factory = sqlite3.Row
     return _database
 
-def infer_tops(current):
-    tuple = (current["atoc_code"], current["power_type"], current["speed"],
-        current["timing_load"], current["seating_class"])
-    for k,v in TOPS_INFERENCES.items():
-        if all([not y or x==y for x,y in zip(tuple, k)]):
-            return v
-    return (None, [])
-
 def format(schedule, date, associations):
     global TIPLOCS, TOCS
 
     for location in schedule["locations"]:
         del location["iid"], location["seq"], location["description"]
         tiploc = location["tiploc"]
+        location["activity_list"] = [a+b for a,b in list(zip(*[iter(location["activity"])]*2)) if (a+b).strip()]
+        location["name"] = None
         location["associations"] = associations.get((tiploc, location["tiploc_instance"]))
         
-        location["name"] = None
         if tiploc in TIPLOCS:
             loc_data = TIPLOCS[tiploc]
             location["name"] = loc_data["name"]
@@ -171,10 +127,62 @@ def schedule_for(uid, date, recurse=False):
             ("success",True),
             ("message", "OK"),
             ("cancelled", current["stp"]=="C"),
-            ("tops_inferred", infer_tops(current)[0]),
+            ("tops_inferred", None),("tops_possible",[]),("tops_familiar",None),("tops_image",None),
             ("current",  current),
             ])
+        struct.update(tops.infer(current))
         return struct
+
+@app.route('/style')
+def style():
+    return app.send_static_file('style.css')
+
+def half(time):
+    return time.replace("H", "½")
+
+def disambiguate(type, code, multiple=False):
+    global CODES
+    code = code or ''
+    ret = ''
+    for segment in code*multiple or [code] or []:
+        summary = CODES[type].get(segment)
+        if summary:
+            ret += '<abbr title="%s">%s</abbr>' % (summary, segment)
+        else:
+            ret += segment
+    return ret
+
+@app.route('/html/schedule/<path:path>/<path:date>')
+def html_schedule(path, date):
+    global ACTIVITY
+
+    schedule = None
+    message, status = None, 200
+    try:
+        if not is_authenticated(): raise UnauthenticatedException()
+        schedule = rowfor(path, date, True)
+        if not schedule:
+            status, message = 404, "UID unknown, or date outside validity"
+        else:
+            schedule.update(tops.infer(schedule))
+            for location in schedule["locations"]:
+                location["activity_outlines"] = [ACTIVITY.get(a, {"classes": '', "summary": "unknown"}) for a in location["activity_list"]]
+
+    except ValueError as e:
+        status, message = 400, "Invalid date format. Dates must be valid and in ISO 8601 format (YYYY-MM-DD)"
+    except UnauthenticatedException as e:
+        status, message = 403, "Unauthenticated"
+    except Exception as e:
+        status, message = 500, "Unhandled exception"
+    return Response(
+        flask.render_template("schedule.html", schedule=schedule, message=message, half=half, disambiguate=disambiguate),
+        status=status,
+        mimetype="text/html"
+        )
+
+@app.route('/r/<path:path>')
+def resource(path):
+    return flask.send_from_directory("resources", path, mimetype="image/png")
 
 @app.route('/schedule/<path:path>/<path:date>')
 def root(path, date):
@@ -208,14 +216,13 @@ def summaries(date):
             else:
                 out[uid] = OrderedDict([
                     ("cancelled", current["stp"]=="C"),
-                    ("tops_inferred", infer_tops(current)[0]),
-                    ("tops_possible", infer_tops(current)[1]),
                     ("atoc_code", current["atoc_code"]),
                     ("power_type", current["power_type"]),
                     ("platforms", OrderedDict(
                         [(a["crs"],a["platform"]) for a in current["locations"] if not a.get("pass") and a["crs"]]
                         )),
                     ])
+                out[uid].update(tops.infer(current))
         return Response(json.dumps(out, indent=2), mimetype="application/json", status=200)
             
     except ValueError as e:
@@ -224,6 +231,7 @@ def summaries(date):
         if not failure_message:
             status, failure_message = 500, "Unhandled exception"
     return Response(json.dumps({"success": False, "message": failure_message}, indent=2), mimetype="application/json", status=status)
+
 @app.teardown_appcontext
 def close_connection(exception):
     global _database

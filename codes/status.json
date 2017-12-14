@@ -1,0 +1,12 @@
+{
+    "B": "Bus",
+    "F": "Freight",
+    "P": "Train",
+    "S": "Ship",
+    "T": "Trip",
+    "1": "Train (STP)",
+    "2": "Freight (STP)",
+    "3": "Trip (STP)",
+    "4": "Ship (STP)",
+    "5": "Bus (STP)"
+}

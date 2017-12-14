@@ -1,0 +1,38 @@
+{
+    "OL": "Passenger (London metro)",
+    "OU": "Passenger (Unadvertised)",
+    "OO": "Passenger",
+    "OS": "Staff train",
+    "OW": "Passenger (Mixed)",
+
+    "XC": "Express passenger (International)",
+    "XD": "Sleeper (International)",
+    "XI": "Express passenger (International)",
+    "XR": "Express passenger (Motorail)",
+    "XU": "Express passenger (Unadvertised)",
+    "XX": "Express passenger",
+    "XZ": "Sleeper (Domestic)",
+
+    "BR": "Bus (Replacement)",
+    "BS": "Bus (WTT)",
+    "SS": "Ship",
+
+    "EE": "Empty coaching stock",
+    "EL": "Empty coaching stock (London metro)",
+    "ES": "Empty coaching stock and staff",
+    
+    "JJ": "Postal",
+    "PM": "Post office parcels",
+    "PP": "Parcels",
+    "PV": "Empty non-passenger stock",
+
+    "DD": "Departmental",
+    "DH": "Departmental (Civil engineer)",
+    "DI": "Departmental (Mechanical and Electrical engineer)",
+    "DQ": "Departmental (Stores)",
+    "DT": "Departmental (Test)",
+    "DY": "Departmental (Signals and Telecommunications)",
+
+    "ZB": "Locomotive and brake van",
+    "ZZ": "Locomotive"
+}

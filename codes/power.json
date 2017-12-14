@@ -1,0 +1,10 @@
+{
+    "D":   "Diesel Locomotive",
+    "E":   "Electric Locomotive",
+    "ED":  "Electro-Diesel Locomotive",
+    "DMU": "Diesel Multiple Unit",
+    "EMU": "Electric Multiple Unit",
+    "HST": "High Speed Train",
+    "DEM": "Diesel-Electric Multiple Unit",
+    "EML": "Hauled Electic Multiple Unit"
+}

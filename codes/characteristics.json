@@ -1,0 +1,14 @@
+{
+    "B":  "Vacuum braked",
+    "C":  "Timed at 100mph",
+    "D":  "DOO (Coaching stock trains)",
+    "E":  "Conveys Mk4 coaches",
+    "G":  "Guard required",
+    "M":  "Timed at 110mph",
+    "P":  "Push/pull train",
+    "Q":  "Runs as required",
+    "R":  "Air conditioned with PA system",
+    "S":  "Steam heated",
+    "Y":  "Runs to terminals/yards as required",
+    "Z":  "May convey traffic to SB1C gauge. No diversion without authority"
+}

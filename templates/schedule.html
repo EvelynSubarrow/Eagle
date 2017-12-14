@@ -1,0 +1,127 @@
+<!doctype HTML>
+<html>
+    <head>
+        <title>Eagle lol</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="/style">
+    </head>
+    <body>
+        <div class="content">
+        {% if message %}
+            <div class="message">{{message}}</div>
+        {% endif %}
+        {% if schedule -%}
+            <table>
+                <tr class="headrow">
+                    <th class="borderleft">UID</th>
+                    <th>STP</th>
+                    <th>Starts</th>
+                    <th>Ends</th>
+                    <th>Weekdays</th>
+                    <th>Bk hol</th>
+                    <th class="borderleft">Status</th>
+                    <th class="borderright">Category</th>
+                    <th>ATOC</th>
+                    <th class="borderright">Name</th>
+                </tr>
+                <tr>
+                    <td class="uid borderleft">{{schedule["uid"]}}</td>
+                    <td class="stp">{{ disambiguate("stp", schedule["stp"]) |safe}}</td>
+                    <td class="date">{{schedule["valid_from"]}}</td>
+                    <td class="date">{{schedule["valid_to"]}}</td>
+                    <td class="weekdays">{{schedule["running_days"]}}</td>
+                    <td class="bhols">{{schedule["bank_holiday_running"]}}</td>
+                    <td class="status borderleft">{{ disambiguate("status", schedule["status"]) |safe}}</td>
+                    <td class="category borderright">{{ disambiguate("category", schedule["category"]) |safe}}</td>
+                    <td class="atoc">{{schedule["atoc_code"]}}</td>
+                    <td class="operator borderright">{{schedule["operator_name"]}}</td>
+                </tr>
+            </table>
+            {% if schedule["tops_image"] %}
+            <div class="diagram-container">
+                <p><a href="{{ schedule["tops_image"]["attribution"]["uri"] }}">{{ schedule["tops_image"]["attribution"]["name"] }}</a> ({{ schedule["tops_image"]["attribution"]["licence"] }})<br><img class="diagram" src="{{ schedule["tops_image"]["uri"] }}" /></p>
+            </div>
+            {% endif %}
+            <table>
+                <tr class="headrow">
+                    <th class="headgroup" colspan="5" />
+                    <th class="headgroup" colspan="4">Facilities</th>
+                    <th class="headgroup" colspan="2" />
+                </tr>
+                <tr class="headrow">
+                    <th class="borderleft">Head</th>
+                    <th>Power</th>
+                    <th>Timing</th>
+                    <th>Speed</th>
+                    <th>Characteristics</th>
+                    <th class="borderleft">Seating</th>
+                    <th>Sleepers</th>
+                    <th>Reservations</th>
+                    <th class="borderright">Catering</th>
+                    <th>Class</th>
+                    <th class="borderright"></th>
+                </tr>
+                <tr>
+                    <td class="borderleft">{{ schedule["signalling_id"] }}</td>
+                    <td>{{ disambiguate("power", schedule["power_type"]) |safe}}</td>
+                    <td>{{ schedule["timing_load"] or ""}}</td>
+                    <td>{{ schedule["speed"] or ""}}</td>
+                    <td>{{ disambiguate("characteristics", schedule["operating_characteristics"], 1) |safe}}</td>
+                    <td class="borderleft">{{ disambiguate("classes", schedule["seating_class"]) |safe}}</td>
+                    <td>{{ disambiguate("classes", schedule["sleepers"]) |safe}}</td>
+                    <td>{{ disambiguate("reservations", schedule["reservations"]) |safe}}</td>
+                    <td class="borderright">{{ disambiguate("catering", schedule["catering"], 1) |safe}}</td>
+                    <td class="classes">{{ schedule["tops_inferred"] or ''}}</td>
+                    <td class="classname borderright">{{ schedule["tops_familiar"] or '' }}</td>
+                </tr>
+            </table>
+            <table>
+                <tr class="headrow">
+                    <th colspan="4" class="headgroup" />
+                    <th colspan="3" class="headgroup">WTT</th>
+                    <th colspan="2" class="headgroup">GBTT</th>
+                    <th colspan="2" class="headgroup">Route</th>
+                    <th colspan="3" class="headgroup">Allowances</th>
+                    <th colspan="1" class="headgroup" />
+                </tr>
+                <tr class="headrow">
+                    <th class="borderleft">TIPLOC</th>
+                    <th>CRS</th>
+                    <th>Name</th>
+                    <th class="borderleft borderright">Pl</th>
+                    <th class="borderleft">Arr</th>
+                    <th>Dep</th>
+                    <th class="borderright">Pass</th>
+                    <th class="borderleft">Arr</th>
+                    <th class="borderright">Dep</th>
+                    <th class="borderleft">Line</th>
+                    <th class="borderright">Path</th>
+                    <th class="borderleft">Eng</th>
+                    <th>Pth</th>
+                    <th class="borderright">Prf</th>
+                    <th class="borderleft borderright">Activity</th>
+                </tr>
+            {% for location in schedule["locations"] -%}
+                <tr class="{{ "pass" if location["pass"] else ""}}">
+                    <td class="tiploc borderleft">{{location["tiploc"]}}</td>
+                    <td class="crs">{{ location["crs"] or "" }}</td>
+                    <td class="locname">{{location["name"]}}</td>
+                    <td class="platform borderleft borderright"> {{location["platform"] or ""}}
+                    <td class="time borderleft">{{half(location["arrival"] or "")}}</td>
+                    <td class="time">{{half(location["departure"] or "")}}</td>
+                    <td class="time borderright">{{half(location["pass"] or "")}}</td>
+                    <td class="time borderleft">{{location["arrival_public"] or ""}}</td>
+                    <td class="time borderright">{{location["departure_public"] or ""}}</td>
+                    <td class="routepart borderleft">{{location["line"] or ""}}</td>
+                    <td class="routepart borderright">{{location["path"] or ""}}</td>
+                    <td class="routepart borderleft">{{ half(location["engineering_allowance"] or "") }}</td>
+                    <td class="routepart">{{ half(location["pathing_allowance"] or "") }}</td>
+                    <td class="routepart borderright">{{ half(location["performance_allowance"] or "") }}</td>
+                    <td class="activity borderleft borderright">{% for activity in location["activity_outlines"] %}<abbr class="{{activity["classes"]}}" title="{{ activity["summary"] }}">{{activity["code"]}}</span>{% endfor %}</td>
+                </tr>
+            {% endfor %}
+            </table>
+        {% endif -%}
+        </div>
+    </body>
+</html>

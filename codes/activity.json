@@ -1,0 +1,177 @@
+{
+  "-D": {
+    "classes": "operational highlight",
+    "code": "-D",
+    "summary": "Stops to detach vehicles"
+  },
+  "-T": {
+    "classes": "operational highlight",
+    "code": "-T",
+    "summary": "Stops to attach and detach vehicles"
+  },
+  "-U": {
+    "classes": "operational highlight",
+    "code": "-U",
+    "summary": "Stops to attach vehicles"
+  },
+  "A ": {
+    "classes": "operational",
+    "code": "A ",
+    "summary": "Stops or shunts for other trains to pass"
+  },
+  "AE": {
+    "classes": "operational highlight",
+    "code": "AE",
+    "summary": "Attach/Detach assisting locomotive"
+  },
+  "AX": {
+    "classes": "operational",
+    "code": "AX",
+    "summary": "Shows as 'X' on arrival"
+  },
+  "BL": {
+    "classes": "operational",
+    "code": "BL",
+    "summary": "Stops for banking locomotive"
+  },
+  "C ": {
+    "classes": "operational highlight",
+    "code": "C ",
+    "summary": "Stops to change train crew"
+  },
+  "D ": {
+    "classes": "passenger highlight",
+    "code": "D ",
+    "summary": "Stops to set down passengers"
+  },
+  "E ": {
+    "classes": "operational highlight",
+    "code": "E ",
+    "summary": "Stops for examination"
+  },
+  "G ": {
+    "classes": "",
+    "code": "G ",
+    "summary": "National Rail Timetable data to add"
+  },
+  "H ": {
+    "classes": "",
+    "code": "H ",
+    "summary": "Notional activity to prevent WTT timing columns merge"
+  },
+  "HH": {
+    "classes": "",
+    "code": "HH",
+    "summary": "As H, where a third column is involved"
+  },
+  "K ": {
+    "classes": "passenger highlight",
+    "code": "K ",
+    "summary": "Passenger count point"
+  },
+  "KC": {
+    "classes": "passenger highlight",
+    "code": "KC",
+    "summary": "Ticket collection and examination point"
+  },
+  "KE": {
+    "classes": "passenger highlight",
+    "code": "KE",
+    "summary": "Ticket examination point"
+  },
+  "KF": {
+    "classes": "passenger highlight",
+    "code": "KF",
+    "summary": "Ticket examination point, 1st class only"
+  },
+  "KS": {
+    "classes": "passenger highlight",
+    "code": "KS",
+    "summary": "Selective ticket examination point"
+  },
+  "L ": {
+    "classes": "operational highlight",
+    "code": "L ",
+    "summary": "Stops to change locomotives"
+  },
+  "N ": {
+    "classes": "passenger highlight",
+    "code": "N ",
+    "summary": "Stop not advertised"
+  },
+  "OP": {
+    "classes": "operational highlight",
+    "code": "OP",
+    "summary": "Stops for other operating reasons"
+  },
+  "OR": {
+    "classes": "operational",
+    "code": "OR",
+    "summary": "Train locomotive on rear"
+  },
+  "PR": {
+    "classes": "operational",
+    "code": "PR",
+    "summary": "Propelling between points shown"
+  },
+  "R ": {
+    "classes": "passenger highlight",
+    "code": "R ",
+    "summary": "Stops when requested"
+  },
+  "RM": {
+    "classes": "operational",
+    "code": "RM",
+    "summary": "Reversing movement, or driver changes ends"
+  },
+  "RR": {
+    "classes": "operational",
+    "code": "RR",
+    "summary": "Stops for locomotive to run round train"
+  },
+  "S ": {
+    "classes": "operational highlight",
+    "code": "S ",
+    "summary": "Stops for railway personnel only"
+  },
+  "T ": {
+    "classes": "passenger",
+    "code": "T ",
+    "summary": "Stops to take up and set down passengers"
+  },
+  "TB": {
+    "classes": "passenger",
+    "code": "TB",
+    "summary": "Train begins (Origin)"
+  },
+  "TF": {
+    "classes": "passenger",
+    "code": "TF",
+    "summary": "Train finishes (Destination)"
+  },
+  "TS": {
+    "classes": "",
+    "code": "TS",
+    "summary": "Detail Consist for TOPS Direct"
+  },
+  "TW": {
+    "classes": "operational highlight",
+    "code": "TW",
+    "summary": "Stops or slows for tablet, staff or token"
+  },
+  "U ": {
+    "classes": "passenger highlight",
+    "code": "U ",
+    "summary": "Stops to take up passengers"
+  },
+  "W ": {
+    "classes": "operational highlight",
+    "code": "W ",
+    "summary": "Stops for watering of coaches"
+  },
+  "X ": {
+    "classes": "operational",
+    "code": "X ",
+    "summary": "Passes another train at crossing point on single line"
+  }
+}
