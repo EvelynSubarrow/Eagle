@@ -5,20 +5,18 @@ body
     font-family: monospace;
     font-size: 10pt;
     whitespace: pre;
+    margin:0;
 }
 
 .content
 {
-    width:             80%;
-    margin-left:       auto;
-    margin-right:      auto;
+    width:        80%;
+    margin-left:  auto;
+    margin-right: auto;
  
-    border-left-style: solid;
-    border-width:      1px;
-    border-color:      #88f;
-    padding-left:      20px;
-    padding-top:       10px;
-    padding-bottom:    10px;
+    border-left:  solid 1px #88f;
+    padding-left: 20px;
+    padding-top:  10px;
 }
 
 .message
@@ -29,45 +27,50 @@ body
 
 table
 {
-    margin-top:        20px;
-    margin-bottom:     20px;
-    width:             100%;
-    border-spacing: 0;
+    margin-top:      20px;
+    margin-bottom:   20px;
+    width:           100%;
+    border-spacing:  0;
     border-collapse: collapse;
 }
 
 td,th
 {
-    vertical-align:   top;
-    /*border: inherit;*/
-    padding-left:     5px;
-    padding-right:    5px;
-    text-align:left;
-    white-space: nowrap;
+    vertical-align: top;
+    padding-left:   5px;
+    padding-right:  5px;
+    text-align:     left;
+    white-space:    nowrap;
 }
 
 th{
-    font-style: normal;
-    font-weight: lighter;
+    font-style:     normal;
+    font-weight:    lighter;
 }
 
 .headgroup
 {
-    padding: 0px;
+    padding:    0px;
     text-align: center;
 }
 
+tr:nth-child(odd) {
+    background: #04000f;
+}
+tr:hover {
+    background: #08080f;
+}
 .headrow
 {
-    background-color: #000;
+    background-color: #000 !important;
     border-top: none;
     color:#787880;
 }
 
 tr
 {
-    /*border-left: solid 1px #fff;*/
-    border-top: solid 1px #060612;
+    border-top:    solid 1px #060612;
+    border-bottom: solid 1px #060612;
 }
 
 tr:first-child
@@ -76,18 +79,17 @@ tr:first-child
 }
 
 /* Outline table */
-.uid      { width: 7ch;  }
+.uid      { min-width: 7ch;  }
 .stp      { width: 3ch;  }
 .operator { width: 100%; }
 
 /* Physical table */
-.diagram {
-    width:100%;
-}
+.diagram { width:100%; }
 .diagram-container {
     border-left: 1px solid #334;
     padding-left: 5px;
 }
+
 .classname {
     font-style: italic;
     width: 100%;
@@ -96,11 +98,11 @@ tr:first-child
 /* Locations table */
 .pass { color:#668; }
 
-.tiploc     { width: 7ch;  }
+.tiploc     { min-width: 7ch;  }
 .crs        { width: 3ch;  }
 .locname    { width: 100%; }
-.platform   { width: 3ch;  }
-.time       { width: 5ch;  }
+.platform   { min-width: 3ch;  }
+.time       { min-width: 5ch;  }
 .routepart  { width: 3ch;  }
 .activity   { width: 12ch; }
 
