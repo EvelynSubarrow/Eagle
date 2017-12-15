@@ -51,6 +51,15 @@
             "name": "Unisouth",
             "licence": "CC BY-SA 3.0"
         }
+    },
+
+    "lm350": {
+        "uri": "/r/LM350.png",
+        "attribution": {
+            "uri": "https://commons.wikimedia.org/wiki/File:Class_350_London_Midland_Diagram.PNG",
+            "name": "Unisouth",
+            "licence": "CC BY-SA 3.0"
+        }
     }
 
 }
