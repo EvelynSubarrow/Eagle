@@ -15,6 +15,7 @@ TOPS_INFERENCES = [
     (("SR", "EMU", None , "0",   None), ["380"], "Desiro", IMAGES["sr380"]),
     (("LM", "EMU", None , "350", None), ["350"], "Desiro", IMAGES["lm350"]),
     (("LM", "EMU", None , "323", None), ["323"]),
+    (("TP", "EMU", None , "350", None), ["350"], "Desiro", IMAGES["tp350"]),
     (("ME", "EMU", None , None , None), ["507", "508"], None, IMAGES["me507-508"]),
     (("SE", "EMU", None , "395", None), ["395"], "Javelin"),
 

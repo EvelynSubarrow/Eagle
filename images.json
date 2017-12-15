@@ -60,6 +60,15 @@
             "name": "Unisouth",
             "licence": "CC BY-SA 3.0"
         }
+    },
+
+    "tp350": {
+        "uri": "/r/TP350.png",
+        "attribution": {
+            "uri": "https://commons.wikimedia.org/wiki/File:TransPennine_Express_Class_350_Diagram.png",
+            "name": "Agent Squash",
+            "licence": "CC BY-SA 4.0"
+        }
     }
 
 }
