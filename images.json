@@ -69,6 +69,15 @@
             "name": "Agent Squash",
             "licence": "CC BY-SA 4.0"
         }
+    },
+
+    "se395": {
+        "uri": "/r/SE395.png",
+        "attribution": {
+            "uri": "https://commons.wikimedia.org/wiki/File:Class_395_Southeastern_Diagram.PNG",
+            "name": "Unisouth",
+            "licence": "CC BY-SA 3.0"
+        }
     }
 
 }
