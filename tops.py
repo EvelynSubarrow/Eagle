@@ -39,7 +39,6 @@ TOPS_INFERENCES = [
 
     #GW only operates class 143 pacers
     (("GW", "DMU", None , "A", None),   ["143"], "Pacer"),
-    (("GW", "DMU", "125", None, None),  ["800"], "Super Express"),
 
     #EM operates only two "high speed" classes. 222 *should* be DEM but whatever
     (("EM", "DMU", "125", None, None),  ["222"], "Meridian", IMAGES["em222"]),
