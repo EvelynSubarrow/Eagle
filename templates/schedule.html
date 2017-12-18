@@ -6,11 +6,14 @@
         <link rel="stylesheet" type="text/css" href="/style">
     </head>
     <body>
-        <div class="content">
+        <section class="content">
         {% if message %}
-            <div class="message">{{message}}</div>
+            <section class="message">{{message}}</section>
         {% endif %}
         {% if schedule -%}
+        {% for note in notes %}
+            <section class="message">{{ note }}</section>
+        {% endfor %}
             <table>
                 <tr class="headrow">
                     <th class="borderleft">UID</th>
@@ -38,9 +41,9 @@
                 </tr>
             </table>
             {% if schedule["tops_image"] %}
-            <div class="diagram-container">
+            <section class="diagram-container">
                 <p><a href="{{ schedule["tops_image"]["attribution"]["uri"] }}">{{ schedule["tops_image"]["attribution"]["name"] }}</a> ({{ schedule["tops_image"]["attribution"]["licence"] }})<br><img class="diagram" src="{{ schedule["tops_image"]["uri"] }}" /></p>
-            </div>
+            </section>
             {% endif %}
             <table>
                 <tr class="headrow">
@@ -122,6 +125,6 @@
             {% endfor %}
             </table>
         {% endif -%}
-        </div>
+        </section>
     </body>
 </html>
