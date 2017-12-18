@@ -65,7 +65,7 @@
                     <th class="borderright"></th>
                 </tr>
                 <tr>
-                    <td class="borderleft">{{ schedule["signalling_id"] }}</td>
+                    <td class="borderleft">{{ schedule["signalling_id"] or ''}}</td>
                     <td>{{ disambiguate("power", schedule["power_type"]) |safe}}</td>
                     <td>{{ schedule["timing_load"] or ""}}</td>
                     <td>{{ schedule["speed"] or ""}}</td>
