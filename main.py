@@ -55,12 +55,14 @@ def format(schedule, date, associations):
     return schedule
 
 def rowfor(uid, date, recurse=False):
+    request_datetime = datetime.datetime.strptime(date, "%Y-%m-%d")
     c = get_database().cursor()
     c.execute("SELECT * FROM `schedules` WHERE `uid`==? AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` ASC LIMIT 1;", (uid, date))
     ret = c.fetchone()
     if ret:
         ret = OrderedDict(ret)
         ret["operator_name"] = TOCS.get(ret["atoc_code"])
+        ret["weekday_match"] = ret["running_days"][request_datetime.weekday()] == "1"
         c.execute("SELECT codes.*,locations.* FROM locations LEFT JOIN codes ON locations.tiploc==codes.tiploc WHERE locations.iid==? ORDER BY locations.seq;", [ret["iid"],])
         ret["locations"] = [OrderedDict(a) for a in c.fetchall()]
         ret = format(OrderedDict(ret), date, associations(uid, date, recurse))
@@ -115,8 +117,6 @@ def is_authenticated():
         return True
 
 def schedule_for(uid, date, recurse=False):
-        datetime.datetime.strptime(date, "%Y-%m-%d")
-
         current = rowfor(uid, date, recurse)
         struct = OrderedDict([
             ("success",True),
@@ -131,6 +131,10 @@ def schedule_for(uid, date, recurse=False):
 @app.route('/style')
 def style():
     return app.send_static_file('style.css')
+
+@app.route('/logo')
+def logo():
+    return app.send_static_file('eagle.svg')
 
 def half(time):
     return time.replace("H", "½")
@@ -151,6 +155,7 @@ def disambiguate(type, code, multiple=False):
 def html_schedule(path, date):
     global ACTIVITY
 
+    schedule_notes = []
     schedule = None
     message, status = None, 200
     try:
@@ -162,7 +167,8 @@ def html_schedule(path, date):
             schedule.update(tops.infer(schedule))
             for location in schedule["locations"]:
                 location["activity_outlines"] = [ACTIVITY.get(a, {"classes": '', "summary": "unknown"}) for a in location["activity_list"]]
-
+            if not schedule["weekday_match"]:
+                schedule_notes.append("This train isn't scheduled to run on the specified weekday")
     except ValueError as e:
         status, message = 400, "Invalid date format. Dates must be valid and in ISO 8601 format (YYYY-MM-DD)"
     except UnauthenticatedException as e:
@@ -170,7 +176,7 @@ def html_schedule(path, date):
     except Exception as e:
         status, message = 500, "Unhandled exception"
     return Response(
-        flask.render_template("schedule.html", schedule=schedule, message=message, half=half, disambiguate=disambiguate),
+        flask.render_template("schedule.html", schedule=schedule, message=message, half=half, disambiguate=disambiguate, notes=schedule_notes),
         status=status,
         mimetype="text/html"
         )
