@@ -12,7 +12,7 @@
         {% endif %}
         {% if schedule -%}
         {% for note in notes %}
-            <section class="message">{{ note }}</section>
+            <section class="note">{{ note }}</section>
         {% endfor %}
             <table>
                 <tr class="headrow">
@@ -37,7 +37,7 @@
                     <td class="status borderleft">{{ disambiguate("status", schedule["status"]) |safe}}</td>
                     <td class="category borderright">{{ disambiguate("category", schedule["category"]) |safe}}</td>
                     <td class="atoc">{{schedule["atoc_code"]}}</td>
-                    <td class="operator borderright">{{schedule["operator_name"]}}</td>
+                    <td class="operator borderright">{{schedule["operator_name"] or ''}}</td>
                 </tr>
             </table>
             {% if schedule["tops_image"] %}
