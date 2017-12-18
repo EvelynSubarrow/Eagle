@@ -169,6 +169,8 @@ def html_schedule(path, date):
                 location["activity_outlines"] = [ACTIVITY.get(a, {"classes": '', "summary": "unknown"}) for a in location["activity_list"]]
             if not schedule["weekday_match"]:
                 schedule_notes.append("This train isn't scheduled to run on the specified weekday")
+            if "Q" in schedule["operating_characteristics"]:
+                schedule_notes.append("This train only runs as required")
     except ValueError as e:
         status, message = 400, "Invalid date format. Dates must be valid and in ISO 8601 format (YYYY-MM-DD)"
     except UnauthenticatedException as e:
