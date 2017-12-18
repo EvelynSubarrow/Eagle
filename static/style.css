@@ -110,8 +110,11 @@ tr:first-child
 .platform   { min-width: 3ch;  }
 .time       { min-width: 5ch;  }
 .routepart  { width: 3ch;  }
-.activity   { width: 12ch; }
+.activities { width: 12ch; }
 
+.activity {
+    padding-right: 5px;
+}
 
 .borderright
 {
