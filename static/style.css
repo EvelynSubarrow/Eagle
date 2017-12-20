@@ -115,6 +115,7 @@ tr:first-child
 .time       { min-width: 5ch;  }
 .routepart  { min-width: 3ch;  }
 .activities { width: 12ch; }
+.distance   { min-width: 1ch;  }
 
 .activity {
     padding-right: 5px;

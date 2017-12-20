@@ -44,15 +44,16 @@ def get_database():
 def format(schedule, date, associations):
     global TIPLOCS, TOCS
 
-    cum_m = 0
+    metres = 0
     last_en = None
     for location in schedule["locations"]:
         full = TIPLOCS[location["tiploc"]]
         if full["loc_source"]:
             if last_en:
-                cum_m += int(math.sqrt((last_en[0]-full["easting"])**2 + (last_en[1]-full["northing"])**2))
+                metres += int(math.sqrt((last_en[0]-full["easting"])**2 + (last_en[1]-full["northing"])**2))
             last_en = full["easting"], full["northing"]
-        location["distance"] = cum_m
+        location["distance"] = metres
+        location["distance_km"] = int(metres/1000)
         
         del location["iid"], location["seq"]
         tiploc = location["tiploc"]
