@@ -73,8 +73,7 @@ def rowfor(uid, date, recurse=False):
     for schedule in all:
         if schedule["running_days"][date.weekday()] == "1":
             ret = schedule
-    if not ret:
-        ret = schedule
+    ret = ret or schedule
     if ret:
         ret = OrderedDict(ret)
         ret["operator_name"] = TOCS.get(ret["atoc_code"])
