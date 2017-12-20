@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-import sqlite3, json, datetime, os
+import sqlite3, json, datetime, os, math
 from collections import OrderedDict, defaultdict, Counter
 from datetime import timedelta
+
 
 import flask, werkzeug
 from flask import Response
@@ -43,7 +44,16 @@ def get_database():
 def format(schedule, date, associations):
     global TIPLOCS, TOCS
 
+    cum_m = 0
+    last_en = None
     for location in schedule["locations"]:
+        full = TIPLOCS[location["tiploc"]]
+        if full["loc_source"]:
+            if last_en:
+                cum_m += int(math.sqrt((last_en[0]-full["easting"])**2 + (last_en[1]-full["northing"])**2))
+            last_en = full["easting"], full["northing"]
+        location["distance"] = cum_m
+        
         del location["iid"], location["seq"]
         tiploc = location["tiploc"]
         location["activity_list"] = [a+b for a,b in list(zip(*[iter(location["activity"])]*2)) if (a+b).strip()]

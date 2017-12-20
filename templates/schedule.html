@@ -103,6 +103,7 @@
                     <th>Pth</th>
                     <th class="borderright">Prf</th>
                     <th class="borderleft borderright">Activity</th>
+                    <th class="borderleft borderright">km</th>
                 </tr>
             {% for location in schedule["locations"] -%}
                 <tr class="primaryrow {{ "pass" if location["pass"] else ""}}">
@@ -121,10 +122,11 @@
                     <td class="routepart">{{ half(location["pathing_allowance"] or "") }}</td>
                     <td class="routepart borderright">{{ half(location["performance_allowance"] or "") }}</td>
                     <td class="activities borderleft borderright">{% for activity in location["activity_outlines"] %}<abbr class="activity" title="{{ activity["summary"] }}">{{activity["code"]}}</abbr>{% endfor %}</td>
+                    <td class="distance">{{ location["distance"]/1000 }}</td>
                 </tr>
             {% if location["associations"] %}
                 <tr>
-                    <td class="associations" colspan="15">
+                    <td class="associations" colspan="16">
                         <table class="associations">
             {% for association in location["associations"] %}
                             <tr>
