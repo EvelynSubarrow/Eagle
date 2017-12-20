@@ -27,7 +27,7 @@
                     <th>ATOC</th>
                     <th class="borderright">Name</th>
                 </tr>
-                <tr>
+                <tr class="primaryrow">
                     <td class="uid borderleft">{{schedule["uid"]}}</td>
                     <td class="stp">{{ disambiguate("stp", schedule["stp"]) |safe}}</td>
                     <td class="date">{{schedule["valid_from"]}}</td>
@@ -64,7 +64,7 @@
                     <th>Class</th>
                     <th class="borderright"></th>
                 </tr>
-                <tr>
+                <tr class="primaryrow">
                     <td class="borderleft">{{ schedule["signalling_id"] or ''}}</td>
                     <td>{{ disambiguate("power", schedule["power_type"]) |safe}}</td>
                     <td>{{ schedule["timing_load"] or ""}}</td>
@@ -105,7 +105,7 @@
                     <th class="borderleft borderright">Activity</th>
                 </tr>
             {% for location in schedule["locations"] -%}
-                <tr class="{{ "pass" if location["pass"] else ""}}">
+                <tr class="primaryrow {{ "pass" if location["pass"] else ""}}">
                     <td class="tiploc borderleft">{{location["tiploc"]}}</td>
                     <td class="crs">{{ location["crs"] or "" }}</td>
                     <td class="locname">{{location["name"]}}</td>
@@ -122,6 +122,28 @@
                     <td class="routepart borderright">{{ half(location["performance_allowance"] or "") }}</td>
                     <td class="activities borderleft borderright">{% for activity in location["activity_outlines"] %}<abbr class="activity" title="{{ activity["summary"] }}">{{activity["code"]}}</abbr>{% endfor %}</td>
                 </tr>
+            {% if location["associations"] %}
+                <tr>
+                    <td class="associations" colspan="15">
+                        <table class="associations">
+            {% for association in location["associations"] %}
+                            <tr>
+                                <td class="assoc_assoc borderright">{{ association["from"]*"←" or "→" }}</td>
+                                <td class="category borderleft">{{ association["category"] }}</td>
+                                <td class="assoc_type borderright">{{ association["type"] }}</td>
+                                <td class="uid borderleft">{{ association["uid_assoc"] }}</td>
+                                <td class="stp borderright">{{ disambiguate("stp", association["stp"]) |safe }}</td>
+                                <td class="assoc_direction">{{ association["direction"]*"from" or "to" }}</td>
+                                <td class="tiploc">{{ association["far_tiploc"] }}</td>
+                                <td class="crs">{{ association["far_crs"] }}</td>
+                                <td class="locname">{{ association["far_name"] }}</td>
+                            </tr>
+            {% endfor %}
+                        </table>
+                    </td>
+                </tr>
+            {% endif  %}
+
             {% endfor %}
             </table>
         {% endif -%}

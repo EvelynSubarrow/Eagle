@@ -2,6 +2,7 @@
 
 import sqlite3, json, datetime, os
 from collections import OrderedDict, defaultdict, Counter
+from datetime import timedelta
 
 import flask, werkzeug
 from flask import Response
@@ -46,8 +47,7 @@ def format(schedule, date, associations):
         del location["iid"], location["seq"]
         tiploc = location["tiploc"]
         location["activity_list"] = [a+b for a,b in list(zip(*[iter(location["activity"])]*2)) if (a+b).strip()]
-        location["associations"] = associations.get((tiploc, location["tiploc_instance"]))
-        
+        location["associations"] = associations.get((tiploc, location["tiploc_instance"]), [])
         location["dolphin_times"] = OrderedDict()
         location["dolphin_times"]["sta"] = location.get("arrival_public") or location.get("arrival")
         location["dolphin_times"]["std"] = location.get("departure_public") or location.get("departure") or location.get("pass")
@@ -55,14 +55,19 @@ def format(schedule, date, associations):
     return schedule
 
 def rowfor(uid, date, recurse=False):
-    request_datetime = datetime.datetime.strptime(date, "%Y-%m-%d")
     c = get_database().cursor()
-    c.execute("SELECT * FROM `schedules` WHERE `uid`==? AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` ASC LIMIT 1;", (uid, date))
-    ret = c.fetchone()
+    c.execute("SELECT * FROM `schedules` WHERE `uid`==? AND ? BETWEEN `valid_from` AND `valid_to` ORDER BY `stp` DESC;", (uid, date))
+    all = c.fetchall()
+    ret,schedule = None, None
+    for schedule in all:
+        if schedule["running_days"][date.weekday()] == "1":
+            ret = schedule
+    if not ret:
+        ret = schedule
     if ret:
         ret = OrderedDict(ret)
         ret["operator_name"] = TOCS.get(ret["atoc_code"])
-        ret["weekday_match"] = ret["running_days"][request_datetime.weekday()] == "1"
+        ret["weekday_match"] = ret["running_days"][date.weekday()] == "1"
         c.execute("SELECT codes.*,locations.* FROM locations LEFT JOIN codes ON locations.tiploc==codes.tiploc WHERE locations.iid==? ORDER BY locations.seq;", [ret["iid"],])
         ret["locations"] = [OrderedDict(a) for a in c.fetchall()]
         ret = format(OrderedDict(ret), date, associations(uid, date, recurse))
@@ -76,23 +81,32 @@ def associations(uid, date, recurse=False):
     # Reduce with cancellations topmost, allowing for multiple categories per tiploc
     ret = OrderedDict()
     for assoc in all:
-        ret[(assoc["tiploc"], assoc["suffix"], assoc["category"])] = assoc
+        if assoc["assoc_days"][date.weekday()]=="1":
+            ret[(assoc["tiploc"], assoc["suffix"], assoc["category"], assoc["uid"], assoc["uid_assoc"])] = assoc
     ret2 = defaultdict(list)
     # Now let's put all the associations together
     for assoc in ret.values():
+        if assoc["stp"]=="C": continue
         assoc["from"] = False
+        assoc["relative_indicator"] = assoc["date_indicator"]
         # For the sake of simplicity, uid_assoc will always refer to the service associated (from)/to
         if assoc["uid_assoc"] == uid:
             assoc["uid"], assoc["uid_assoc"] = assoc["uid_assoc"], assoc["uid"]
             # This is a 'from' association. This train was separated from, joined from, or was previous service
             assoc["from"] = True
+            assoc["relative_indicator"] = {"S":"S", "N":"P", "P":"N"}[assoc["date_indicator"]]
         # Direction is to indicate whether it's more helpful to indicate the origin as an associated from (VV, NP)
         # Or destination (JJ). Generally, if the association doesn't happen at the terminus or origin of the association,
         # Destination is preferable (and more useful for passengers)
         assoc["direction"] = assoc["from"]
         assoc.update({a:None for a in ["origin_name", "origin_crs", "origin_tiploc", "dest_name", "dest_crs", "dest_tiploc"]})
         if recurse:
-            assoc_sched = rowfor(assoc["uid_assoc"], date, False)
+            date_rel = date
+            if assoc["relative_indicator"]=="N":
+                date_rel += timedelta(days=1)
+            if assoc["relative_indicator"]=="P":
+                date_rel += timedelta(days=-1)
+            assoc_sched = rowfor(assoc["uid_assoc"], date_rel, False)
             if assoc_sched:
                 locs = assoc_sched["locations"]
                 first, last = locs[0], locs[-1]
@@ -102,8 +116,7 @@ def associations(uid, date, recurse=False):
                              "dest_name": last["name"], "dest_crs": last["crs"], "dest_tiploc": last["tiploc"],
                              "far_name": far["name"], "far_crs": far["crs"], "far_tiploc": far["tiploc"]
                     })
-        if assoc["stp"]!="C":
-            ret2[(assoc["tiploc"], assoc["suffix"])].append(assoc)
+        ret2[(assoc["tiploc"], assoc["suffix"])].append(assoc)
     return ret2
 
 def is_authenticated():
@@ -159,6 +172,7 @@ def html_schedule(path, date):
     schedule = None
     message, status = None, 200
     try:
+        date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
         if not is_authenticated(): raise UnauthenticatedException()
         schedule = rowfor(path, date, True)
         if not schedule:
@@ -176,6 +190,7 @@ def html_schedule(path, date):
     except UnauthenticatedException as e:
         status, message = 403, "Unauthenticated"
     except Exception as e:
+        raise e
         status, message = 500, "Unhandled exception"
     return Response(
         flask.render_template("schedule.html", schedule=schedule, message=message, half=half, disambiguate=disambiguate, notes=schedule_notes),
@@ -193,6 +208,7 @@ def root(path, date):
     failure_message = None
     status = 200
     try:
+        date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
         struct = schedule_for(path, date, True)
         return Response(json.dumps(struct, indent=2), mimetype="application/json", status=status)
     except ValueError as e:
@@ -210,7 +226,7 @@ def summaries(date):
     uids = request.args.get('uids', "")
     uids = uids.split(" ")
     try:
-        datetime.datetime.strptime(date, "%Y-%m-%d")
+        date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
         out = OrderedDict()
         for uid in uids:
             current = rowfor(uid, date)
