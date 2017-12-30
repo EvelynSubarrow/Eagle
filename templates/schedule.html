@@ -137,7 +137,7 @@
                                 <td class="stp borderright">{{ disambiguate("stp", association["stp"]) |safe }}</td>
                                 <td class="assoc_direction">{{ association["direction"]*"from" or "to" }}</td>
                                 <td class="tiploc">{{ association["far_tiploc"] }}</td>
-                                <td class="crs">{{ association["far_crs"] }}</td>
+                                <td class="crs">{{ association["far_crs"] or ''}}</td>
                                 <td class="locname">{{ association["far_name"] }}</td>
                             </tr>
             {% endfor %}
