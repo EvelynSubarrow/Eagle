@@ -51083,8 +51083,8 @@
     "loc_source": "Z",
     "manager_atoc": "SR",
     "manager_name": "ScotRail",
-    "name": "Glasgow Queen Street",
-    "name_source": "X",
+    "name": "Glasgow Queen Street [High Level]",
+    "name_source": "A",
     "northing": 665515,
     "stanox": "06401",
     "tiploc": "GLGQHL"
@@ -51096,8 +51096,8 @@
     "loc_source": "Z",
     "manager_atoc": "SR",
     "manager_name": "ScotRail",
-    "name": "Glasgow Queen Street",
-    "name_source": "X",
+    "name": "Glasgow Queen Street [Low Level]",
+    "name_source": "A",
     "northing": 665531,
     "stanox": "06399",
     "tiploc": "GLGQLL"
@@ -120659,8 +120659,8 @@
     "loc_source": "Z",
     "manager_atoc": "RT",
     "manager_name": "Network Rail",
-    "name": "London St Pancras (Intl)",
-    "name_source": "X",
+    "name": "London St Pancras [Thameslink]",
+    "name_source": "A",
     "northing": 183135,
     "stanox": "63629",
     "tiploc": "STPXBOX"
