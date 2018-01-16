@@ -25850,8 +25850,8 @@
     "loc_source": "X",
     "manager_atoc": "ZB",
     "manager_name": "Bus Station",
-    "name": "Park Lane (Bus)",
-    "name_source": "X",
+    "name": "Park Lane [TW Metro]",
+    "name_source": "A",
     "northing": 556621,
     "stanox": "14034",
     "tiploc": "CIVI"
@@ -92098,8 +92098,8 @@
     "loc_source": "X",
     "manager_atoc": "ZB",
     "manager_name": "Bus Station",
-    "name": "Regent Centre (Bus)",
-    "name_source": "X",
+    "name": "Regent Centre [TW Metro]",
+    "name_source": "A",
     "northing": 568607,
     "stanox": "12405",
     "tiploc": "NWCSRC"
@@ -113210,8 +113210,8 @@
     "loc_source": "X",
     "manager_atoc": "PC",
     "manager_name": "Private Charter",
-    "name": "Private Charter",
-    "name_source": "X",
+    "name": "Sinfin North",
+    "name_source": "A",
     "northing": 332923,
     "stanox": "57455",
     "tiploc": "SINFINN"
