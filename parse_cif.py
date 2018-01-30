@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json, os, sqlite3
+import json, os, sys, sqlite3
 from collections import Counter, OrderedDict
 
 # sqlite has no real equivalent to "TRUNCATE TABLE x". "DELETE FROM x" is recommended but it's slow.
@@ -200,7 +200,8 @@ with open("sched.cif", "rb") as f:
         record_type, res = r2d(record)
         count +=1
         if count%10000==0:
-            print("%8s %s" % (count, record_type))
+            sys.stdout.write("\r%8s %s" % (count, record_type))
+            sys.stdout.flush()
 
         if record_type == "AA":
             c.execute("INSERT INTO `associations` VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
@@ -225,6 +226,7 @@ with open("sched.cif", "rb") as f:
                 ))
             loc_id += 1
         elif record_type == "ZZ":
+            print()
             print(record)
             conn.commit()
             conn.close()
