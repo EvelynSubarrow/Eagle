@@ -211,7 +211,7 @@ def html_schedule(path, date):
 def resource(path):
     return flask.send_from_directory("resources", path, mimetype="image/png")
 
-@app.route('/api/schedule/<path:path>/<path:date>')
+@app.route('/json/schedule/<path:path>/<path:date>')
 def root(path, date):
     if not is_authenticated(): return AUTH_FAIL
     failure_message = None
@@ -227,7 +227,7 @@ def root(path, date):
             status, failure_message = 500, "Unhandled exception"
     return Response(json.dumps({"success": False, "message":failure_message}, indent=2), mimetype="application/json", status=status)
 
-@app.route('/api/summaries/<path:date>')
+@app.route('/json/summaries/<path:date>')
 def summaries(date):
     global TIPLOC
     if not is_authenticated(): return AUTH_FAIL
