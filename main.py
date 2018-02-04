@@ -117,7 +117,7 @@ def associations(uid, date, recurse=False):
             if assoc["relative_indicator"]=="P":
                 date_rel += timedelta(days=-1)
             assoc_sched = rowfor(assoc["uid_assoc"], date_rel, False)
-            if assoc_sched:
+            if assoc_sched and assoc_sched["locations"]:
                 locs = assoc_sched["locations"]
                 first, last = locs[0], locs[-1]
                 assoc["direction"] = last["tiploc"]==assoc["tiploc"]
@@ -200,7 +200,6 @@ def html_schedule(path, date):
     except UnauthenticatedException as e:
         status, message = 403, "Unauthenticated"
     except Exception as e:
-        raise e
         status, message = 500, "Unhandled exception"
     return Response(
         flask.render_template("schedule.html", schedule=schedule, message=message, half=half, disambiguate=disambiguate, notes=schedule_notes),
@@ -212,7 +211,7 @@ def html_schedule(path, date):
 def resource(path):
     return flask.send_from_directory("resources", path, mimetype="image/png")
 
-@app.route('/schedule/<path:path>/<path:date>')
+@app.route('/api/schedule/<path:path>/<path:date>')
 def root(path, date):
     if not is_authenticated(): return AUTH_FAIL
     failure_message = None
@@ -228,7 +227,7 @@ def root(path, date):
             status, failure_message = 500, "Unhandled exception"
     return Response(json.dumps({"success": False, "message":failure_message}, indent=2), mimetype="application/json", status=status)
 
-@app.route('/summaries/<path:date>')
+@app.route('/api/summaries/<path:date>')
 def summaries(date):
     global TIPLOC
     if not is_authenticated(): return AUTH_FAIL
