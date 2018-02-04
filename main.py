@@ -260,6 +260,11 @@ def summaries(date):
             status, failure_message = 500, "Unhandled exception"
     return Response(json.dumps({"success": False, "message": failure_message}, indent=2), mimetype="application/json", status=status)
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return flask.render_template('404.html',messages=["404 - Not Found"]), 404
+
+
 @app.teardown_appcontext
 def close_connection(exception):
     global _database

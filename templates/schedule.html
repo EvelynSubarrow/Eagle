@@ -1,12 +1,6 @@
-<!doctype HTML>
-<html>
-    <head>
-        <title>Eagle - {{schedule["uid"] if schedule else ""}}</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" type="text/css" href="/style">
-    </head>
-    <body>
-        <section class="content">
+{% extends "layout.html" %}
+{% block title %}{{schedule["uid"] if schedule else "Schedule not available"}}{% endblock %}
+{% block content %}
         {% if message %}
             <section class="message">{{message}}</section>
         {% endif %}
@@ -149,6 +143,4 @@
             {% endfor %}
             </table>
         {% endif -%}
-        </section>
-    </body>
-</html>
+{% endblock %}

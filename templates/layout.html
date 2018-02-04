@@ -1,0 +1,16 @@
+<!doctype HTML>
+<html>
+    <head>
+        {% block head %}
+        <title>Eagle - {% block title %}{% endblock %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="/style">
+        {% endblock %}
+    </head>
+    <body>
+        <section class="content">
+        {% block content %}
+        {% endblock %}
+        </section>
+    </body>
+</html>
