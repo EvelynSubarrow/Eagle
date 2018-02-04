@@ -174,7 +174,7 @@ def disambiguate(type, code, multiple=False):
             ret += segment
     return ret
 
-@app.route('/html/schedule/<path:path>/<path:date>')
+@app.route('/schedule/<path:path>/<path:date>')
 def html_schedule(path, date):
     global ACTIVITY
 
