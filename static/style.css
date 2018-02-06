@@ -8,6 +8,14 @@ body
     margin:0;
 }
 
+.container {
+    position: relative;
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-rows: 1fr auto;
+}
+
 .content
 {
     width:        80%;
@@ -19,10 +27,17 @@ body
     padding-bottom: 10px;
 }
 
+footer
+{
+    color:#668;
+    text-align: center;
+}
+
 .message
 {
     border-left: 1px solid #633;
     padding-left: 5px;
+    font-size: 15pt;
 }
 
 .note
