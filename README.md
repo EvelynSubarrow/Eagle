@@ -40,4 +40,4 @@ I wouldn't have been able to put this together without the NROD wiki, maintained
 http://nrodwiki.rockshore.net/
 
 ### Sven Slootweg
-@joepie91 helped me gain some understanding of the dark arts of CSS layout, and without this, the web endpoints would probably be absolutely positioned tables, or something equally terrible.
+[@joepie91](https://github.com/joepie91) helped me gain some understanding of the dark arts of CSS layout, and without this, the web endpoints would probably be absolutely positioned tables, or something equally terrible.
