@@ -34,6 +34,10 @@ all TOCs. Once you have the CIF schedule, you should run `parse_cif.py`, which w
 Once this is done, you'll want to rename `config.json.example` to `config.json`, review the settings, then run `main.py`.
 
 ## Additional credits
-I wouldn't have been able to put this together without the NROD wiki, maintained by Peter Hicks.
 
+### National Rail Open Data wiki
+I wouldn't have been able to put this together without the NROD wiki, maintained by Peter Hicks, and other contributors.
 http://nrodwiki.rockshore.net/
+
+### Sven Slootweg
+@joepie91 helped me gain some understanding of the dark arts of CSS layout, and without this, the web endpoints would probably be absolutely positioned tables, or something equally terrible.
