@@ -9,14 +9,21 @@
     </head>
     <body>
         <section class="container">
+            <header>
+                {% block header %}
+                {% endblock %}
+            </header>
             <section class="content">
             {% block content %}
             {% endblock %}
             </section>
+            <section></section>
             <footer>
+                {% block footer %}
                 <p>
                     <i>Stop, look, listen. Beware of trains.</i>
                 </p>
+                {% endblock %}
             </footer>
         </section>
     </body>

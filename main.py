@@ -209,7 +209,7 @@ def html_schedule(path, date):
 
 @app.route('/r/<path:path>')
 def resource(path):
-    return flask.send_from_directory("resources", path, mimetype="image/png")
+    return flask.send_from_directory("resources", path)
 
 @app.route('/json/schedule/<path:path>/<path:date>')
 def root(path, date):
@@ -264,6 +264,9 @@ def summaries(date):
 def page_not_found(e):
     return flask.render_template('404.html',messages=["404 - Not Found"]), 404
 
+@app.route('/')
+def index():
+    return flask.render_template('index.html')
 
 @app.teardown_appcontext
 def close_connection(exception):

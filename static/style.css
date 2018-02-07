@@ -13,7 +13,7 @@ body
     min-height: 100vh;
     box-sizing: border-box;
     display: grid;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: auto auto 1fr auto;
 }
 
 .content
@@ -27,10 +27,19 @@ body
     padding-bottom: 10px;
 }
 
+header
+{
+    color:#668;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 8pt;
+}
+
 footer
 {
     color:#668;
-    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .message
@@ -175,4 +184,25 @@ table.associations {
 .passenger.highlight
 {
     color: #ddf;
+}
+
+/* General links */
+a:link
+{
+    text-decoration: none;
+    color:           #ccf;
+    font-weight:     bold;
+}
+
+a:visited
+{
+    text-decoration: none;
+    color:           #aad;
+    font-weight:     normal;
+}
+
+a:hover,
+a:active
+{
+    text-decoration: underline;
 }
