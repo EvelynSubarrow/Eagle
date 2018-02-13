@@ -897,14 +897,14 @@
     "tiploc": "ABWDER"
   },
   "ABWDXR": {
-    "crs": null,
+    "crs": "ABW",
     "easting": null,
     "ldb": false,
     "loc_source": null,
     "manager_atoc": null,
     "manager_name": null,
-    "name": "Abbey Wood (Crossrail)",
-    "name_source": "I",
+    "name": "Abbey Wood [Crossrail]",
+    "name_source": "A",
     "northing": null,
     "stanox": "88607",
     "tiploc": "ABWDXR"
@@ -48873,8 +48873,8 @@
     "loc_source": null,
     "manager_atoc": null,
     "manager_name": null,
-    "name": "Farringdon Crossrail",
-    "name_source": "I",
+    "name": "Farringdon [Crossrail]",
+    "name_source": "A",
     "northing": null,
     "stanox": "63636",
     "tiploc": "FRNDXR"
@@ -75673,14 +75673,14 @@
     "tiploc": "LIVSTHS"
   },
   "LIVSTLL": {
-    "crs": null,
+    "crs": "LST",
     "easting": null,
     "ldb": false,
     "loc_source": null,
     "manager_atoc": null,
     "manager_name": null,
-    "name": "Liverpool St Crossrail",
-    "name_source": "I",
+    "name": "London Liverpool Street [Crossrail]",
+    "name_source": "A",
     "northing": null,
     "stanox": "52745",
     "tiploc": "LIVSTLL"
@@ -94601,14 +94601,14 @@
     "tiploc": "PADTBAL"
   },
   "PADTLL": {
-    "crs": null,
+    "crs": "PAD",
     "easting": null,
     "ldb": false,
     "loc_source": null,
     "manager_atoc": null,
     "manager_name": null,
-    "name": "Paddington Crossrail",
-    "name_source": "I",
+    "name": "London Paddington [Crossrail]",
+    "name_source": "A",
     "northing": null,
     "stanox": "73003",
     "tiploc": "PADTLL"
@@ -132340,14 +132340,14 @@
     "tiploc": "WCHAPEL"
   },
   "WCHAPXR": {
-    "crs": null,
+    "crs": "ZLW",
     "easting": null,
     "ldb": false,
     "loc_source": null,
     "manager_atoc": null,
     "manager_name": null,
-    "name": "Whitechapel Crossrail",
-    "name_source": "I",
+    "name": "Whitechapel [Crossrail]",
+    "name_source": "A",
     "northing": null,
     "stanox": "52085",
     "tiploc": "WCHAPXR"
