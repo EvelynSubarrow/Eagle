@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sqlite3, json, datetime, os, math
+import sqlite3, json, datetime, os, math, re
 from collections import OrderedDict, defaultdict, Counter
 from datetime import timedelta
 
@@ -13,6 +13,8 @@ import tops
 
 class UnauthenticatedException(Exception): pass
 AUTH_FAIL = Response(json.dumps({"success": False, "message":"Authentication failure"}, indent=2), mimetype="application/json", status=403)
+
+DATE_PATTERN = re.compile(r"\d{4}-\d\d-\d\d")
 
 with open("codes/tiploc.json") as f:
     TIPLOCS = json.load(f)
@@ -64,6 +66,9 @@ def format(schedule, date, associations):
         location["dolphin_times"]["std"] = location.get("departure_public") or location.get("departure") or location.get("pass")
         location["dolphin_times"]["pass"] = location.get("pass")
     return schedule
+
+def weekday_pattern(date):
+    return ''.join([(date.weekday()==a)*"1" or "_" for a in range(7)])
 
 def rowfor(uid, date, recurse=False):
     c = get_database().cursor()
@@ -151,6 +156,9 @@ def schedule_for(uid, date, recurse=False):
         struct.update(tops.infer(current))
         return struct
 
+def error_page(code, message):
+    return flask.render_template('error.html', messages=["{0} - {1}".format(code, message)]), code
+
 @app.route('/style')
 def style():
     return app.send_static_file('style.css')
@@ -180,13 +188,12 @@ def html_schedule(path, date):
 
     schedule_notes = []
     schedule = None
-    message, status = None, 200
     try:
         date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
         if not is_authenticated(): raise UnauthenticatedException()
         schedule = rowfor(path, date, True)
         if not schedule:
-            status, message = 404, "UID unknown, or date outside validity"
+            return error_page(404, "UID unknown, or date outside validity")
         else:
             schedule.update(tops.infer(schedule))
             for location in schedule["locations"]:
@@ -196,14 +203,64 @@ def html_schedule(path, date):
             if "Q" in schedule["operating_characteristics"]:
                 schedule_notes.append("This train only runs as required")
     except ValueError as e:
-        status, message = 400, "Invalid date format. Dates must be valid and in ISO 8601 format (YYYY-MM-DD)"
+        return error_page(400, "Invalid date format. Dates must be valid and in ISO 8601 format (YYYY-MM-DD)")
     except UnauthenticatedException as e:
-        status, message = 403, "Unauthenticated"
+        return error_page(403, "Unauthenticated")
     except Exception as e:
-        status, message = 500, "Unhandled exception"
+        return error_page(500, "Unhandled exception")
     return Response(
-        flask.render_template("schedule.html", schedule=schedule, message=message, half=half, disambiguate=disambiguate, notes=schedule_notes),
-        status=status,
+        flask.render_template("schedule.html", schedule=schedule, half=half, disambiguate=disambiguate, notes=schedule_notes),
+        status=200,
+        mimetype="text/html"
+        )
+
+@app.route('/location/<code>/<date>')
+def html_location(code, date):
+    global config
+    try:
+        date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+        if not is_authenticated(): raise UnauthenticatedException()
+        c = get_database().cursor()
+        if code.isnumeric() and len(code)==5: #STANOX
+            c.execute("SELECT * FROM `codes` WHERE `stanox`==?;", (code,))
+        elif code.isalpha() and len(code)==3: #CRS
+            c.execute("SELECT * FROM `codes` WHERE `crs`==?;", (code,))
+        elif code.isalnum() and len(code) in range(4,8): #TIPLOC, range 4..7
+            c.execute("SELECT * FROM `codes` WHERE `tiploc`==?;", (code,))
+        else:
+            return error_page(400, "No valid location identifier provided.")
+
+        # All non-rail locations have a 00000 STANOX. Could be useful as a shortcut, but takes far too long to retrieve
+        if code=="00000" and not config.get("allow_null_stanox"):
+            return error_page(400, "STANOX 00000 disallowed.")
+
+        locations = c.fetchall()
+        tiplocs = [a["tiploc"] for a in locations]
+        if not locations:
+            return error_page(404, "No location found matching this identifier.")
+
+        schedules = []
+        for location in locations:
+            c.execute("SELECT DISTINCT schedules.uid from locations LEFT JOIN schedules ON locations.iid==schedules.iid WHERE locations.tiploc==? AND ? BETWEEN schedules.valid_from AND schedules.valid_to AND schedules.running_days LIKE '{0}' ORDER BY schedules.stp DESC;".format(weekday_pattern(date)), (location["tiploc"],date.isoformat()))
+            schedules.extend(c.fetchall())
+        schedules = [rowfor(a["uid"], date) for a in schedules]
+        departures = []
+        for schedule in schedules:
+            if not schedule or not schedule["weekday_match"]: continue
+            for location in schedule["locations"]:
+                if location["tiploc"] in tiplocs:
+                    location["activity_outlines"] = [ACTIVITY.get(a, {"classes": '', "summary": "unknown"}) for a in location["activity_list"]]
+                    departures.append((location, schedule))
+        departures.sort(key=lambda x: x[0]["departure"] or x[0]["arrival"] or x[0]["pass"])
+    except ValueError as e:
+        return error_page(400, "Invalid date format. Dates must be valid and in ISO 8601 format (YYYY-MM-DD)")
+    except UnauthenticatedException as e:
+        return error_page(403, "Unauthenticated")
+    except Exception as e:
+        return error_page(500, "Unhandled exception")
+    return Response(
+        flask.render_template("location.html", schedules=departures, locations=locations, half=half, disambiguate=disambiguate, notes=[], code=code, date=date),
+        status=200,
         mimetype="text/html"
         )
 
@@ -212,7 +269,7 @@ def resource(path):
     return flask.send_from_directory("resources", path)
 
 @app.route('/json/schedule/<path:path>/<path:date>')
-def root(path, date):
+def json_schedule(path, date):
     if not is_authenticated(): return AUTH_FAIL
     failure_message = None
     status = 200
@@ -228,7 +285,7 @@ def root(path, date):
     return Response(json.dumps({"success": False, "message":failure_message}, indent=2), mimetype="application/json", status=status)
 
 @app.route('/json/summaries/<path:date>')
-def summaries(date):
+def json_summaries(date):
     global TIPLOC
     if not is_authenticated(): return AUTH_FAIL
     status, failure_message = 200, ""
@@ -262,11 +319,29 @@ def summaries(date):
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return flask.render_template('404.html',messages=["404 - Not Found"]), 404
+    return error_page(404, "Not Found")
 
 @app.route('/')
 def index():
     return flask.render_template('index.html')
+
+@app.route("/redirect/schedule")
+def redirect_schedule():
+    uid = request.args.get("uid", '')
+    date = request.args.get("date", '')
+    if uid.isalnum() and DATE_PATTERN.match(date):
+        return flask.redirect(flask.url_for("html_schedule", path=uid, date=date))
+    else:
+        return error_page(400, "Bad Request")
+
+@app.route("/redirect/location")
+def redirect_location():
+    code = request.args.get("code", '')
+    date = request.args.get("date", '')
+    if code.isalnum() and DATE_PATTERN.match(date):
+        return flask.redirect(flask.url_for("html_location", code=code, date=date))
+    else:
+        return error_page(400, "Bad Request")
 
 @app.teardown_appcontext
 def close_connection(exception):

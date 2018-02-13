@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% block title %}{{code}} services on {{date.isoformat()}}{% endblock %}
+{% block content %}
+        {% if message %}
+            <section class="message">{{message}}</section>
+        {% endif %}
+        {% for note in notes %}
+            <section class="note">{{ note }}</section>
+        {% endfor %}
+            <table>
+                <tr class="headrow">
+                    <th class="borderleft">TIPLOC</th>
+                    <th>STANOX</th>
+                    <th>CRS</th>
+                    <th class="borderright">Name</th>
+                </tr>
+                {% for location in locations %}
+                <tr>
+                    <td class="tiploc borderleft">{{ location["tiploc"] }}</td>
+                    <td class="stanox">{{ location["stanox"] }}</td>
+                    <td class="crs">{{ location["crs"] or '' }}</td>
+                    <td class="locname borderright">{{ location["name"] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            <table>
+                <tr class="headrow">
+                    <th colspan="2" class="headgroup"></th>
+                    <th colspan="3" class="headgroup">WTT</th>
+                    <th colspan="2" class="headgroup">GBTT</th>
+                    <th colspan="8" class="headgroup"></th>
+                </tr>
+                <tr class="headrow">
+                    <th class="borderleft">TIPLOC</th>
+                    <th class="borderleft borderright">Pl</th>
+                    <th class="borderleft">Arr</th>
+                    <th>Dep</th>
+                    <th class="borderright">Pass</th>
+                    <th class="borderleft">Arr</th>
+                    <th class="borderright">Dep</th>
+                    <th class="borderleft borderright">Activity</th>
+                    <th>UID</th>
+                    <th>Head</th>
+                    <th class="borderright">Power</th>
+                    <th class="borderleft">Category</th>
+                    <th>ATOC</th>
+                    <th class="borderleft">Origin</th>
+                    <th class="borderright">Destination</th>
+                </tr>
+            {% for location,schedule in schedules -%}
+                <tr class="primaryrow {{ "pass" if location["pass"] else ""}} {{ "as-required" if "Q" in schedule["operating_characteristics"] else '' }}">
+                    <td class="tiploc borderleft">{{location["tiploc"]}}</td>
+                    <td class="platform borderleft borderright"> {{location["platform"] or ""}}
+                    <td class="time borderleft">{{half(location["arrival"] or "")}}</td>
+                    <td class="time">{{half(location["departure"] or "")}}</td>
+                    <td class="time borderright">{{half(location["pass"] or "")}}</td>
+                    <td class="time borderleft">{{location["arrival_public"] or ""}}</td>
+                    <td class="time borderright">{{location["departure_public"] or ""}}</td>
+                    <td class="activities borderleft borderright">{% for activity in location["activity_outlines"] %}<abbr class="activity" title="{{ activity["summary"] }}">{{activity["code"]}}</abbr>{% endfor %}</td>
+                    <td class="uid borderleft">{{ schedule["uid"] }}</td>
+                    <td>{{ schedule["signalling_id"] or '' }}</td>
+                    <td class="borderright">{{ schedule["power_type"] }}</td>
+                    <td>{{ disambiguate("category", schedule["category"]) |safe}}</td>
+                    <td>{{ schedule["atoc_code"] }}</td>
+                    <td class="origin borderleft">{{ schedule["locations"][0]["name"] }}</td>
+                    <td class="destination borderright">{{ schedule["locations"][-1]["name"] }}</td>
+                </tr>
+            {% endfor %}
+            </table>
+{% endblock %}

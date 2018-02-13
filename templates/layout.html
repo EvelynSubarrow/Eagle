@@ -13,10 +13,12 @@
                 {% block header %}
                 {% endblock %}
             </header>
+            {% block content_outer %}
             <section class="content">
             {% block content %}
             {% endblock %}
             </section>
+            {% endblock %}
             <section></section>
             <footer>
                 {% block footer %}

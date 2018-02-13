@@ -6,6 +6,7 @@ body
     font-size: 10pt;
     whitespace: pre;
     margin:0;
+    width:100%;
 }
 
 .container {
@@ -49,6 +50,51 @@ footer
     font-size: 15pt;
 }
 
+.scheduleform {
+    margin-left: auto;
+    margin-right: auto;
+    display: inline-block;
+}
+
+form {
+    display: block;
+}
+
+input, textarea, select {
+    font-family: monospace;
+    border: none;
+    border-left: solid 1px #88f;
+    background-color: inherit;
+    color:           #ddf;
+    padding-left:5px;
+    resize: none;
+}
+input:focus, textarea:focus, select:focus {
+    outline: none;
+}
+
+textarea {
+    width: 100%;
+}
+
+input[type=submit], select {
+    color: #aaf;
+    text-decoration: underline;
+}
+
+label {
+    border-left: solid 1px #88f;
+    padding-left:5px;
+}
+
+label :invalid + span {
+    color: #A44;
+}
+
+label :valid + span {
+    color: #4A4;
+}
+
 .note
 {
     border-left: 1px solid #663;
@@ -75,6 +121,14 @@ td,th
 th{
     font-style:     normal;
     font-weight:    lighter;
+    max-width: 4ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+th:hover {
+    max-width: 64ch;
+    overflow: visible
 }
 
 .headgroup
@@ -128,7 +182,20 @@ tr:first-child
     width: 100%;
 }
 
-/* Locations table */
+/* Location only */
+.as-required { font-style: italic; }
+.origin, .destination {
+    max-width: 26ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.origin:hover, .destination:hover {
+    max-width: 64ch;
+    overflow: visible;
+}
+
+/* Locations table for schedule */
 .pass { color:#668; }
 
 .tiploc     { min-width: 7ch;  }
@@ -137,11 +204,10 @@ tr:first-child
 .platform   { min-width: 3ch;  }
 .time       { min-width: 5ch;  }
 .routepart  { min-width: 3ch;  }
-.activities { width: 12ch; }
+.activities { min-width: 4ch;  }
 .distance   { min-width: 1ch;  }
-
 .activity {
-    padding-right: 5px;
+    padding-right: 1px;
 }
 
 td.associations {
@@ -189,14 +255,13 @@ table.associations {
 /* General links */
 a:link
 {
-    text-decoration: none;
-    color:           #ccf;
-    font-weight:     bold;
+    text-decoration: underline;
+    color: #aaf;
 }
 
 a:visited
 {
-    text-decoration: none;
+    text-decoration: underline;
     color:           #aad;
     font-weight:     normal;
 }
