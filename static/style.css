@@ -121,7 +121,7 @@ td,th
 th{
     font-style:     normal;
     font-weight:    lighter;
-    max-width: 4ch;
+    max-width: 3ch;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -166,7 +166,7 @@ tr:first-child
 }
 
 /* Outline table */
-.uid      { min-width: 7ch;  }
+.uid      { min-width: 6ch;  }
 .stp      { width: 3ch;  }
 .operator { width: 100%; }
 
