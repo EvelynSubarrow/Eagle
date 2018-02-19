@@ -118,15 +118,18 @@ td,th
     white-space:    nowrap;
 }
 
-th{
+th {
     font-style:     normal;
     font-weight:    lighter;
+}
+
+.row-overflow th {
     max-width: 3ch;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-th:hover {
+.row-overflow th:hover {
     max-width: 64ch;
     overflow: visible
 }
