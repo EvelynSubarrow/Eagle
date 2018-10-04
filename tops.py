@@ -26,8 +26,8 @@ TOPS_INFERENCES = [
     ((None, "HST", None , None , None), ["43"], "High Speed Train"),   #HST means IC125 in practice. 225s are 'E'
 
     #SW EMUs can only be distinguished by seating classes, which is fine
-    (("SW", "EMU", None , None,  "S"), ["455", "456", "458", "707"]),
-    (("SW", "EMU", None , None,  "B"), ["444", "450", "458"]),
+    #(("SW", "EMU", None , None,  "S"), ["455", "456", "458", "707"]),
+    #(("SW", "EMU", None , None,  "B"), ["444", "450", "458"]),
     #SW only operates 159s (by technicality of renumbering, but that's fine)
     (("SW", "DMU", None , "X", None),   ["159"], "South Western Turbo", IMAGES["xn159"]),
 
@@ -45,7 +45,7 @@ TOPS_INFERENCES = [
     (("EM", "DMU", "125", None, None),  ["222"], "Meridian", IMAGES["em222"]),
 
     #GR (VTEC)'s only 'E' locos *must* be IC225s
-    (("GR", "E",   "125" , None, None), ["91"]),
+    (("GR", "E",   "125" , None, None), ["91"], "Electra"),
 
     #Non-TOC-specific DMU ranges
     ((None, "DMU", None , "A", None),   ["142", "143", "144"], "Pacer"),
