@@ -47,9 +47,15 @@ TOPS_INFERENCES = [
     #GR (VTEC)'s only 'E' locos *must* be IC225s
     (("GR", "E",   "125" , None, None), ["91"], "Electra"),
 
+    # Only Chiltern operates 168s
+    ((None, "DMU", None, "A", None),    ["168"], "Clubman"),
+
+    # AW is the only 175 operator
+    ((None, "DMU", None, "A", None),    ["158", "175"]),
+
     #Non-TOC-specific DMU ranges
     ((None, "DMU", None , "A", None),   ["142", "143", "144"], "Pacer"),
-    ((None, "DMU", None , "E", None),   ["158", "168", "170", "175"]),
+    ((None, "DMU", None , "E", None),   ["158", "170"]),
     ((None, "DMU", None , "N", None),   ["165"], "Network Turbo"),
     ((None, "DMU", None , "S", None),   ["150", "153", "155", "156"], "(Super) Sprinter"),
     ((None, "DMU", None , "T", None),   ["165", "166"]),
