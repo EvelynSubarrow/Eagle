@@ -299,14 +299,17 @@ def json_summaries(date):
             if not current:
                 out[uid] = {}
             else:
-                out[uid] = OrderedDict([
-                    ("cancelled", current["stp"]=="C"),
-                    ("atoc_code", current["atoc_code"]),
-                    ("power_type", current["power_type"]),
-                    ("platforms", OrderedDict(
-                        [(a["crs"],a["platform"]) for a in current["locations"] if not a.get("pass") and a["crs"]]
-                        )),
-                    ])
+                try:
+                    out[uid] = OrderedDict([
+                        ("cancelled", current["stp"]=="C"),
+                        ("atoc_code", current["atoc_code"]),
+                        ("power_type", current["power_type"]),
+                        ("platforms", OrderedDict(
+                            [(a["crs"],a["platform"]) for a in current["locations"] if not a.get("pass") and a["crs"]]
+                            )),
+                        ])
+                except:
+                    out[uid] = {}
                 out[uid].update(tops.infer(current))
         return Response(json.dumps(out, indent=2), mimetype="application/json", status=200)
             
